@@ -78,6 +78,35 @@ sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'g2 right': pygame.image.load('gfx/ghost2-right.png'),
            }
 
+tiles = {'#': pygame.image.load('gfx/platform.png')
+         }
+
+
+level = ['                ',
+         '                ',
+         '                ',
+         '                ',
+         '                ',
+         '##    ####    ##',
+         '                ',
+         '                ',
+         '   ##      ##   ',
+         '                ',
+         '                ',
+         '####        ####',
+         '                ',
+         '                ',
+         '      ####      ',
+         '                ',
+         '  ###      ###  ',
+         '                ',
+         '                ',
+         '#######  #######',
+         ]
+
+LEV_W = len(level[0])
+LEV_H = len(level)
+
 
 class Player:
     def __init__(self, x, y, number):
@@ -103,13 +132,19 @@ class Player:
 
 class Game:
     def __init__(self):
-        self.player1 = Player(32, 32, 1)
-        self.player2 = Player(ledwall.SCR_W - 32 - 16, 32, 2)
+        self.player1 = Player(48, 240, 1)
+        self.player2 = Player(ledwall.SCR_W - 48 - 16, 240, 2)
 
         self.player1.facedir = 'right'
         self.player2.facedir = 'left'
 
     def render(self):
+        for y in range(LEV_H):
+            for x in range(LEV_W):
+                tile = level[y][x]
+                if tile in tiles:
+                    output.blit(tiles[tile], (x * 16, y * 16))
+
         self.player1.draw(output)
         self.player2.draw(output)
 
@@ -131,6 +166,8 @@ class Application:
         ledwall.compose()
 
     def controls(self):
+        global BRIGHTNESS
+        
         events = pygame.event.get()
 
         for e in events:
