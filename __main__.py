@@ -66,7 +66,7 @@ if not joymode:    # use joystick lib as fallback
 clock = pygame.time.Clock()
 tick = 0
 
-sprite = pygame.image.load('gfx/pumpkin.png')
+sprite = pygame.image.load('gfx/pumpkin1-right.png')
 
 
 class Application:
