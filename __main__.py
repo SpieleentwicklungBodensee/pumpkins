@@ -7,6 +7,7 @@ import ledwall
 print = ledwall.print
 
 
+# -- LED WALL initialization stuff
 
 # read settings from settings.py
 # use default values if no settings.py exists
@@ -31,9 +32,7 @@ if not 'DEFAULT_BRIGHTNESS' in dir():
 
 DEADZONE = 0.4
 
-running = True
 output = ledwall.initScreen(RENDER_MODE)
-
 ledwall.setBrightnessValue(BRIGHTNESS)
 
 
@@ -63,22 +62,71 @@ if not joymode:    # use joystick lib as fallback
             print(' - ' + joy.get_name())
 
 
+
+# -- the actual game
+
 clock = pygame.time.Clock()
 tick = 0
 
-sprite = pygame.image.load('gfx/pumpkin1-right.png')
+sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
+           'p1 right': pygame.image.load('gfx/pumpkin1-right.png'),
+           'p2 left': pygame.image.load('gfx/pumpkin2-left.png'),
+           'p2 right': pygame.image.load('gfx/pumpkin2-right.png'),
+           'g1 left': pygame.image.load('gfx/ghost1-left.png'),
+           'g1 right': pygame.image.load('gfx/ghost1-right.png'),
+           'g2 left': pygame.image.load('gfx/ghost2-left.png'),
+           'g2 right': pygame.image.load('gfx/ghost2-right.png'),
+           }
+
+
+class Player:
+    def __init__(self, x, y, number):
+        self.x = x
+        self.y = y
+
+        self.xdir = 0
+        self.ydir = 0
+
+        self.facedir = 'left'       # 'left' or 'right'
+
+        self.number = number
+        self.state = 'pumpkin'      # 'pumpkin' or 'ghost
+
+    def draw(self, output):
+        key = '%s%i %s' % (self.state[0], self.number, self.facedir)
+        sprite = sprites[key]
+        output.blit(sprite, (self.x, self.y))
+
+    def update(self):
+        pass
+
+
+class Game:
+    def __init__(self):
+        self.player1 = Player(32, 32, 1)
+        self.player2 = Player(ledwall.SCR_W - 32 - 16, 32, 2)
+
+        self.player1.facedir = 'right'
+        self.player2.facedir = 'left'
+
+    def render(self):
+        self.player1.draw(output)
+        self.player2.draw(output)
+
+    def update(self):
+        pass
 
 
 class Application:
     def __init__(self):
         self.running = True
-        self.x = 0
-        self.y = 50
+
+        self.game = Game()
 
     def render(self):
         output.fill((0, 0, 0))
 
-        output.blit(sprite, (self.x, self.y))
+        self.game.render()
 
         ledwall.compose()
 
@@ -92,12 +140,21 @@ class Application:
                 if e.key == pygame.K_ESCAPE:
                     self.running = False
 
-    def update(self):
-        self.x += 1
+                if e.key == pygame.K_F1:
+                    BRIGHTNESS -= 1
+                    ledwall.setBrightnessValue(BRIGHTNESS)
+                    
+                elif e.key == pygame.K_F2:
+                    BRIGHTNESS = min(BRIGHTNESS + 1, 0)
+                    ledwall.setBrightnessValue(BRIGHTNESS)
+                    
+                elif e.key == pygame.K_F5:
+                    ledwall.enableOverlay(not ledwall.showOverlay)
+                elif e.key == pygame.K_F11:
+                    pygame.display.toggle_fullscreen()
 
-        if self.x > ledwall.SCR_W:
-            self.x = sprite.get_width()
-            self.y = random.random() * (ledwall.SCR_H - sprite.get_height())
+    def update(self):
+        self.game.update()
 
 
 app = Application()
