@@ -108,6 +108,16 @@ LEV_W = len(level[0])
 LEV_H = len(level)
 
 
+PLAYER_KEYS = [(pygame.K_RIGHT, pygame.K_LEFT, pygame.K_DOWN, pygame.K_UP),
+               (pygame.K_d, pygame.K_a, pygame.K_s, pygame.K_w),
+               ]
+
+RIGHT = 0
+LEFT = 1
+DOWN = 2
+UP = 3
+
+
 class Player:
     def __init__(self, x, y, number):
         self.x = x
@@ -126,8 +136,37 @@ class Player:
         sprite = sprites[key]
         output.blit(sprite, (self.x, self.y))
 
+    def moveLeft(self):
+        self.xdir = -1
+
+    def stopLeft(self):
+        if self.xdir < 0:
+            self.xdir = 0
+
+    def moveRight(self):
+        self.xdir = 1
+
+    def stopRight(self):
+        if self.xdir > 0:
+            self.xdir = 0
+
     def update(self):
-        pass
+        self.x += self.xdir
+        self.y += self.ydir
+
+        # -- gravity check
+        cx = int(self.x + 8) // 16
+        cy = int(self.y + 16) // 16
+
+        if cy < LEV_H:
+            if level[cy][cx] == ' ':
+                self.ydir = 1.5
+            else:
+                self.ydir = 0
+        
+        # -- fall through
+        if self.y > ledwall.SCR_H + 16:
+            self.y = -16
 
 
 class Game:
@@ -137,6 +176,8 @@ class Game:
 
         self.player1.facedir = 'right'
         self.player2.facedir = 'left'
+
+        self.players = [self.player1, self.player2]
 
     def render(self):
         for y in range(LEV_H):
@@ -149,7 +190,22 @@ class Game:
         self.player2.draw(output)
 
     def update(self):
-        pass
+        for player in self.players:
+            player.update()
+
+    def keyPress(self, key):
+        for i in range(2):
+            if key == PLAYER_KEYS[i][LEFT]:
+                self.players[i].moveLeft()
+            elif key == PLAYER_KEYS[i][RIGHT]:
+                self.players[i].moveRight()
+
+    def keyRelease(self, key):
+        for i in range(2):
+            if key == PLAYER_KEYS[i][LEFT]:
+                self.players[i].stopLeft()
+            elif key == PLAYER_KEYS[i][RIGHT]:
+                self.players[i].stopRight()
 
 
 class Application:
@@ -167,7 +223,7 @@ class Application:
 
     def controls(self):
         global BRIGHTNESS
-        
+
         events = pygame.event.get()
 
         for e in events:
@@ -177,7 +233,7 @@ class Application:
                 if e.key == pygame.K_ESCAPE:
                     self.running = False
 
-                if e.key == pygame.K_F1:
+                elif e.key == pygame.K_F1:
                     BRIGHTNESS -= 1
                     ledwall.setBrightnessValue(BRIGHTNESS)
                     
@@ -189,6 +245,13 @@ class Application:
                     ledwall.enableOverlay(not ledwall.showOverlay)
                 elif e.key == pygame.K_F11:
                     pygame.display.toggle_fullscreen()
+
+                else:
+                    self.game.keyPress(e.key)
+            elif e.type == pygame.KEYUP:
+                self.game.keyRelease(e.key)
+                        
+
 
     def update(self):
         self.game.update()
