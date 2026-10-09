@@ -1,6 +1,7 @@
 import pygame
 import pygame._sdl2.controller
 import time
+import random
 
 import ledwall
 print = ledwall.print
@@ -65,13 +66,20 @@ if not joymode:    # use joystick lib as fallback
 clock = pygame.time.Clock()
 tick = 0
 
+sprite = pygame.image.load('gfx/pumpkin.png')
+
 
 class Application:
     def __init__(self):
         self.running = True
+        self.x = 0
+        self.y = 50
 
     def render(self):
         output.fill((0, 0, 0))
+
+        output.blit(sprite, (self.x, self.y))
+
         ledwall.compose()
 
     def controls(self):
@@ -85,7 +93,11 @@ class Application:
                     self.running = False
 
     def update(self):
-        pass
+        self.x += 1
+
+        if self.x > ledwall.SCR_W:
+            self.x = sprite.get_width()
+            self.y = random.random() * (ledwall.SCR_H - sprite.get_height())
 
 
 app = Application()
