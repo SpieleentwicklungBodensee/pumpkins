@@ -61,3 +61,42 @@ if not joymode:    # use joystick lib as fallback
             joy.init()
             print(' - ' + joy.get_name())
 
+
+clock = pygame.time.Clock()
+tick = 0
+
+
+class Application:
+    def __init__(self):
+        self.running = True
+
+    def render(self):
+        output.fill((0, 0, 0))
+        ledwall.compose()
+
+    def controls(self):
+        events = pygame.event.get()
+
+        for e in events:
+            if e.type==pygame.QUIT:
+                self.running = False
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    self.running = False
+
+    def update(self):
+        pass
+
+
+app = Application()
+
+while app.running:
+    app.render()
+    app.controls()
+    app.update()
+
+    clock.tick(60)
+    tick += 1
+
+    if tick >= 60 * 4:
+        ledwall.cls()
