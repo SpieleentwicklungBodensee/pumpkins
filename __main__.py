@@ -156,6 +156,8 @@ sounds = {'pickup_01': pygame.mixer.Sound('sfx/pickup_01.wav'),
           'intro_01': pygame.mixer.Sound('sfx/intro_01.wav'),
           'walking_bg': pygame.mixer.Sound('sfx/walking_bg.wav'),
           'spawn_ammo': pygame.mixer.Sound('sfx/spawn_ammo.wav'),
+          'shoot_01': pygame.mixer.Sound('sfx/shoot_01.wav'),
+          'hit_02': pygame.mixer.Sound('sfx/hit_02.wav'),
           'event_01': pygame.mixer.Sound('sfx/event_01s.wav'),
           'event_03': pygame.mixer.Sound('sfx/event_03.wav'),
           'event_04': pygame.mixer.Sound('sfx/event_04.wav')}
@@ -496,6 +498,7 @@ class Game:
             elif key == PLAYER_KEYS[i][DOWN]:
                 self.players[i].moveDown()
             elif key == PLAYER_KEYS[i][SHOOT]:
+                sounds['shoot_01'].play()
                 self.players[i].shoot()
 
     def keyRelease(self, key):
