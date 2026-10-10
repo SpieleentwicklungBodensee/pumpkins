@@ -139,7 +139,8 @@ sounds = {'pickup_01': pygame.mixer.Sound('sfx/pickup_01.wav'),
           'ghost_01': pygame.mixer.Sound('sfx/ghost_01.wav'),
           'grumblin_01l': pygame.mixer.Sound('sfx/grumblin_01l.wav'),
           'walking_bg': pygame.mixer.Sound('sfx/walking_bg.wav'),
-          'event_01': pygame.mixer.Sound('sfx/event_01s.wav')}
+          'event_01': pygame.mixer.Sound('sfx/event_01s.wav'),
+          'event_04': pygame.mixer.Sound('sfx/event_04.wav')}
 
 
 PLAYER_KEYS = [(pygame.K_RIGHT, pygame.K_LEFT, pygame.K_DOWN, pygame.K_UP),
@@ -284,6 +285,7 @@ class Player:
                     self.ydir = 0
                 else:
                     self.state = 'pumpkin'
+                    sounds['event_04'].play()
                     self.ydir = 0
 
                 setLevelTile(cx, cy, ' ')
