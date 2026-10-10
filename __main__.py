@@ -12,6 +12,8 @@ print = ledwall.print
 
 WALK_SPEED = 1
 FALL_ACCEL = 0.15
+FLY_ACCEL  = 0.1
+FLY_MAXSPEED = 2
 
 
 # -- settings
@@ -165,13 +167,15 @@ class Player:
 
         self.xdir = 0
         self.ydir = 0
+        self.xspeed = 0
+        self.yspeed = 0
 
         self.ground = False
 
         self.facedir = 'left'       # 'left' or 'right'
 
         self.number = number
-        self.state = 'pumpkin'      # 'pumpkin' or 'ghost
+        self.state = 'pumpkin'      # 'pumpkin' or 'ghost'
 
         self.ammo = 0
 
@@ -214,18 +218,65 @@ class Player:
         if self.ydir > 0:
             self.ydir = 0
 
+    def becomeGhost(self):
+        self.state = 'ghost'
+
+        self.ydir = 0
+        self.yspeed = 0
+
+        sounds['pickup_02'].play()
+
+    def becomePumpkin(self):
+        self.state = 'pumpkin'
+
+        self.ydir = 0
+        self.yspeed = 0
+
+        sounds['event_04'].play()
+
+    def fallDown(self):
+        self.ydir = 1
+        self.yspeed += FALL_ACCEL
+        if self.yspeed >= 4:
+            self.yspeed = 4
+
+        self.ground = False
+
     def update(self):
         tempx = self.x
         tempy = self.y
+
+        if self.state == 'ghost':
+            if self.xdir > 0 and self.xspeed < FLY_MAXSPEED:
+                self.xspeed += FLY_ACCEL
+            if self.xdir < 0 and self.xspeed > -FLY_MAXSPEED:
+                self.xspeed -= FLY_ACCEL
+            if self.ydir > 0 and self.yspeed < FLY_MAXSPEED:
+                self.yspeed += FLY_ACCEL
+            if self.ydir < 0 and self.yspeed > -FLY_MAXSPEED:
+                self.yspeed -= FLY_ACCEL
+        else:
+            if self.xdir > 0:
+                self.xspeed = WALK_SPEED
+            elif self.xdir < 0:
+                self.xspeed = -WALK_SPEED
+            else:
+                self.xspeed = 0
+
+            if self.ydir > 0:
+                pass
+            elif self.ydir < 0:
+                pass
+            else:
+                self.yspeed = 0
         
-        tempx += self.xdir * WALK_SPEED
-        tempy += self.ydir * WALK_SPEED
+        tempx += self.xspeed
+        tempy += self.yspeed
 
         if tempx > ledwall.SCR_W - 16:
             tempx = ledwall.SCR_W - 16
         if tempx < 0:
             tempx = 0
-
 
         self.x = tempx
         self.y = tempy
@@ -250,10 +301,7 @@ class Player:
                 # check if player is colliding with a floor
                 if level[cy][cx] != '#':
                     # no collision - fall down...
-                    self.ydir += FALL_ACCEL
-                    self.ground = False
-                    if self.ydir >= 4:
-                        self.ydir = 4
+                    self.fallDown()
                 else:
                     # collision
                     # check if player was still above the floor in last update
@@ -266,10 +314,7 @@ class Player:
                     else:
                         # player was already in floor tile -> keep falling...                    # no collision - fall down...
                         if int(self.y) != self.y:   # ...but only if not exactly on the edge!
-                            self.ydir += FALL_ACCEL
-                            self.ground = False
-                            if self.ydir >= 4:
-                                self.ydir = 4
+                            self.fallDown()
 
             # -- ghost movement (flying)
 
@@ -280,13 +325,9 @@ class Player:
             if level[cy][cx] == '&':
                 # magic potion
                 if self.state == 'pumpkin':
-                    self.state = 'ghost'
-                    sounds['pickup_02'].play()
-                    self.ydir = 0
+                    self.becomeGhost()
                 else:
-                    self.state = 'pumpkin'
-                    sounds['event_04'].play()
-                    self.ydir = 0
+                    self.becomePumpkin()
 
                 setLevelTile(cx, cy, ' ')
 
