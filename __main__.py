@@ -130,6 +130,18 @@ LEV_W = len(level[0])
 LEV_H = len(level)
 
 
+
+pygame.mixer.init()
+
+sounds = {'pickup_01': pygame.mixer.Sound('sfx/pickup_01.wav'),
+          'pickup_02': pygame.mixer.Sound('sfx/pickup_02.wav'),
+          'pickup_03': pygame.mixer.Sound('sfx/pickup_03.wav'),
+          'ghost_01': pygame.mixer.Sound('sfx/ghost_01.wav'),
+          'grumblin_01l': pygame.mixer.Sound('sfx/grumblin_01l.wav'),
+          'walking_bg': pygame.mixer.Sound('sfx/walking_bg.wav'),
+          'event_01': pygame.mixer.Sound('sfx/event_01s.wav')}
+
+
 PLAYER_KEYS = [(pygame.K_RIGHT, pygame.K_LEFT, pygame.K_DOWN, pygame.K_UP),
                (pygame.K_d, pygame.K_a, pygame.K_s, pygame.K_w),
                ]
@@ -268,6 +280,7 @@ class Player:
                 # magic potion
                 if self.state == 'pumpkin':
                     self.state = 'ghost'
+                    sounds['pickup_02'].play()
                     self.ydir = 0
                 else:
                     self.state = 'pumpkin'
@@ -277,6 +290,7 @@ class Player:
 
             elif level[cy][cx] == 'o':
                 # ammo
+                sounds['pickup_03'].play()
                 self.ammo += 1
                 setLevelTile(cx, cy, ' ')
         
