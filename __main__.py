@@ -322,7 +322,7 @@ class Player:
     def becomeGhost(self):
         self.state = 'ghost'
 
-        self.ydir = 0
+        self.xspeed = 0
         self.yspeed = 0
 
         sounds['pickup_02'].play()
@@ -740,5 +740,5 @@ while app.running:
     clock.tick(60)
     tick += 1
 
-    if tick >= 60 * 4:
+    if tick % 60 * 4 == 0:
         ledwall.cls()
