@@ -312,7 +312,7 @@ class Player:
 
         # -- gravity check
 
-        # get current tile
+        # get current tile BELOW player
         cx = int(self.x + 8) // 16
         cy = int(self.y + 16) // 16
 
@@ -351,6 +351,11 @@ class Player:
                 pass
 
             # check if player collects something
+
+            # get current tile again, this time not BELOW player
+            cx = int(self.x + 8) // 16
+            cy = int(self.y + 8) // 16
+
             if level[cy][cx] == '&':
                 # magic potion
                 if self.state == 'pumpkin':
