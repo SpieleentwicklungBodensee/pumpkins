@@ -98,7 +98,9 @@ sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'g2 right': pygame.image.load('gfx/ghost2-right.png'),
            }
 
-tiles = {'#': pygame.image.load('gfx/platform.png')
+tiles = {'#': pygame.image.load('gfx/platform.png'),
+         '&': pygame.image.load('gfx/magic-potion.png'),
+         'o': pygame.image.load('gfx/ammo.png'),
          }
 
 
@@ -111,12 +113,12 @@ level = ['                ',
          '                ',
          '   ##      ##   ',
          '                ',
-         '                ',
+         ' &            & ',
          '####        ####',
          '                ',
          '                ',
          '      ####      ',
-         '                ',
+         '   o        o   ',
          '  ###      ###  ',
          '                ',
          '                ',
@@ -137,6 +139,9 @@ LEFT = 1
 DOWN = 2
 UP = 3
 
+def setLevelTile(x, y, tile):
+    level[y] = level[y][:x] + tile + level[y][x+1:]
+
 
 class Player:
     def __init__(self, x, y, number):
@@ -152,6 +157,8 @@ class Player:
 
         self.number = number
         self.state = 'pumpkin'      # 'pumpkin' or 'ghost
+
+        self.ammo = 0
 
     def draw(self, output):
         key = '%s%i %s' % (self.state[0], self.number, self.facedir)
@@ -174,6 +181,21 @@ class Player:
         if self.xdir > 0:
             self.xdir = 0
 
+    def moveUp(self):
+        self.ydir = -1
+
+    def stopUp(self):
+        if self.ydir < 0:
+            self.ydir = 0
+
+    def moveDown(self):
+        if self.state == 'ghost':
+            self.ydir = 1
+
+    def stopDown(self):
+        if self.ydir > 0:
+            self.ydir = 0
+
     def update(self):
         self.x += self.xdir * WALK_SPEED
         self.y += self.ydir * WALK_SPEED
@@ -192,26 +214,52 @@ class Player:
         self.prev_y = self.y
 
         if cy < LEV_H:
-            # check if player is colliding with a floor
-            if level[cy][cx] == ' ':
-                # no collision - fall down...
-                self.ydir += FALL_ACCEL
-                if self.ydir >= 4:
-                    self.ydir = 4
-            else:
-                # collision
-                # check if player was still above the floor in last update
-                if level[py][px] == ' ':
-                    # stop falling
-                    self.ydir = 0
-                    # clamp to floor
-                    self.y = (cy -1) * 16
+
+            # -- pumpkin movement (just walking)
+
+            if self.state == 'pumpkin':
+                # check if player is colliding with a floor
+                if level[cy][cx] != '#':
+                    # no collision - fall down...
+                    self.ydir += FALL_ACCEL
+                    if self.ydir >= 4:
+                        self.ydir = 4
                 else:
-                    # player was already in floor tile -> keep falling...                    # no collision - fall down...
-                    if int(self.y) != self.y:   # ...but only if not exactly on the edge!
-                        self.ydir += FALL_ACCEL
-                        if self.ydir >= 4:
-                            self.ydir = 4
+                    # collision
+                    # check if player was still above the floor in last update
+                    if level[py][px] != '#':
+                        # stop falling
+                        self.ydir = 0
+                        # clamp to floor
+                        self.y = (cy -1) * 16
+                    else:
+                        # player was already in floor tile -> keep falling...                    # no collision - fall down...
+                        if int(self.y) != self.y:   # ...but only if not exactly on the edge!
+                            self.ydir += FALL_ACCEL
+                            if self.ydir >= 4:
+                                self.ydir = 4
+
+            # -- ghost movement (flying)
+
+            elif self.state == 'ghost':
+                pass
+
+            # check if player collects something
+            if level[cy][cx] == '&':
+                # magic potion
+                if self.state == 'pumpkin':
+                    self.state = 'ghost'
+                    self.ydir = 0
+                else:
+                    self.state = 'pumpkin'
+                    self.ydir = 0
+
+                setLevelTile(cx, cy, ' ')
+
+            elif level[cy][cx] == 'o':
+                # ammo
+                self.ammo += 1
+                setLevelTile(cx, cy, ' ')
         
         # -- fall through screen border
         if self.y > ledwall.SCR_H + 16:
@@ -250,6 +298,10 @@ class Game:
                 self.players[i].moveLeft()
             elif key == PLAYER_KEYS[i][RIGHT]:
                 self.players[i].moveRight()
+            elif key == PLAYER_KEYS[i][UP]:
+                self.players[i].moveUp()
+            elif key == PLAYER_KEYS[i][DOWN]:
+                self.players[i].moveDown()
 
     def keyRelease(self, key):
         for i in range(2):
@@ -257,6 +309,10 @@ class Game:
                 self.players[i].stopLeft()
             elif key == PLAYER_KEYS[i][RIGHT]:
                 self.players[i].stopRight()
+            elif key == PLAYER_KEYS[i][UP]:
+                self.players[i].stopUp()
+            elif key == PLAYER_KEYS[i][DOWN]:
+                self.players[i].stopDown()
 
 
 class Application:
