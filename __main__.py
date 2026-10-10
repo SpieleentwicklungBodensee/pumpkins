@@ -350,7 +350,7 @@ class Player:
             elif self.state == 'ghost':
                 pass
 
-            # check if player collects something
+            # -- check if player collects something
 
             # get current tile again, this time not BELOW player
             cx = int(self.x + 8) // 16
