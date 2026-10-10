@@ -14,6 +14,7 @@ WALK_SPEED = 1
 FALL_ACCEL = 0.15
 FLY_ACCEL  = 0.1
 FLY_MAXSPEED = 1.5
+SHOT_SPEED = 3
 
 
 # -- settings
@@ -95,6 +96,7 @@ sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'g1 right': pygame.image.load('gfx/ghost1-right.png'),
            'g2 left': pygame.image.load('gfx/ghost2-left.png'),
            'g2 right': pygame.image.load('gfx/ghost2-right.png'),
+           'shot': pygame.image.load('gfx/shot.png'),
            }
 
 tiles = {'#': pygame.image.load('gfx/platform.png'),
@@ -166,8 +168,8 @@ pygame.mixer.music.play(loops=-1)
 
 # -- constants and stuff
 
-PLAYER_KEYS = [(pygame.K_RIGHT, pygame.K_LEFT, pygame.K_DOWN, pygame.K_UP),
-               (pygame.K_d, pygame.K_a, pygame.K_s, pygame.K_w),
+PLAYER_KEYS = [(pygame.K_RIGHT, pygame.K_LEFT, pygame.K_DOWN, pygame.K_UP, pygame.K_RCTRL),
+               (pygame.K_d, pygame.K_a, pygame.K_s, pygame.K_w, pygame.K_TAB),
                ]
 
 clock = pygame.time.Clock()
@@ -177,9 +179,11 @@ RIGHT = 0
 LEFT = 1
 DOWN = 2
 UP = 3
+SHOOT = 4
 
 events = []
 timers = []
+shots = []
 
 
 # -- the actual game code
@@ -200,6 +204,19 @@ class Timer:
     
     def reset(self):
         self.count = 0
+
+
+class Shot:
+    def __init__(self, x, y, xdir):
+        self.x = x
+        self.y = y
+        self.xdir = xdir
+
+    def draw(self, output):
+        output.blit(sprites['shot'], (self.x, self.y))
+
+    def update(self):
+        self.x += self.xdir * SHOT_SPEED
 
 
 class Player:
@@ -261,6 +278,14 @@ class Player:
     def stopDown(self):
         if self.ydir > 0:
             self.ydir = 0
+
+    def shoot(self):
+        if self.ammo == 0:
+            return
+
+        self.ammo -= 1
+        shot = Shot(self.x, self.y, 1 if self.facedir == 'right' else -1)
+        shots.append(shot)
 
     def becomeGhost(self):
         self.state = 'ghost'
@@ -415,12 +440,19 @@ class Game:
         self.player1.draw(output)
         self.player2.draw(output)
 
+        for shot in shots:
+            shot.draw(output)
+
         ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
 
     def update(self):
         # -- update players
         for player in self.players:
             player.update()
+
+        # -- update shots
+        for shot in shots:
+            shot.update()
 
         # -- handle events
         for e in events:
@@ -463,6 +495,8 @@ class Game:
                 self.players[i].moveUp()
             elif key == PLAYER_KEYS[i][DOWN]:
                 self.players[i].moveDown()
+            elif key == PLAYER_KEYS[i][SHOOT]:
+                self.players[i].shoot()
 
     def keyRelease(self, key):
         for i in range(2):
