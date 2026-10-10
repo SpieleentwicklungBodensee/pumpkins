@@ -541,6 +541,62 @@ class Game:
                 self.players[i].stopUp()
             elif key == PLAYER_KEYS[i][DOWN]:
                 self.players[i].stopDown()
+
+    def controllerAxisMotion(self, p, axis, value):
+        if axis == pygame.CONTROLLER_AXIS_LEFTX:
+            print(p, value)
+            if value < 0:
+                if value < -DEADZONE:
+                    self.players[p].moveLeft()
+                else:
+                    self.players[p].stopLeft()
+            elif value > 0:
+                if value > DEADZONE:
+                    self.players[p].moveRight()
+                else:
+                    self.players[p].stopRight()
+            else:
+                self.players[p].stopLeft()
+                self.players[p].stopRight()
+
+        elif axis == pygame.CONTROLLER_AXIS_LEFTY:
+            if value < 0:
+                if value < -DEADZONE:
+                    self.players[p].moveUp()
+                else:
+                    self.players[p].stopUp()
+            elif value > 0:
+                if value > DEADZONE:
+                    self.players[p].moveDown()
+                else:
+                    self.players[p].stopDown()
+            else:
+                self.players[p].stopUp()
+                self.players[p].stopDown()
+
+    def controllerButtonPress(self, p, button):
+        if button in (pygame.CONTROLLER_BUTTON_A, pygame.CONTROLLER_BUTTON_B, pygame.CONTROLLER_BUTTON_X, pygame.CONTROLLER_BUTTON_Y):
+            self.players[p].shoot()
+
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
+            self.players[p].moveLeft()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_RIGHT:
+            self.players[p].moveRight()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_UP:
+            self.players[p].moveUp()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
+            self.players[p].moveDown()
+
+
+    def controllerButtonRelease(self, p, button):
+        if button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
+            self.players[p].stopLeft()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_RIGHT:
+            self.players[p].stopRight()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_UP:
+            self.players[p].stopUp()
+        elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
+            self.players[p].stopDown()
     
     def spawnMagicPotion(self):
         x, y = findFreeRandomSpot()
@@ -593,6 +649,20 @@ class Application:
                     self.game.keyPress(e.key)
             elif e.type == pygame.KEYUP:
                 self.game.keyRelease(e.key)
+
+            elif e.type == pygame.CONTROLLERAXISMOTION and joymode == 'controller':
+                value = max(-1, e.value / 32767)
+                p = e.instance_id
+                self.game.controllerAxisMotion(p, e.axis, value)
+
+            elif e.type == pygame.CONTROLLERBUTTONDOWN and joymode == 'controller':
+                p = e.instance_id
+                self.game.controllerButtonPress(p, e.button)
+
+            elif e.type == pygame.CONTROLLERBUTTONUP and joymode == 'controller':
+                p = e.instance_id
+                self.game.controllerButtonRelease(p, e.button)
+
 
     def update(self):
         self.game.update()
