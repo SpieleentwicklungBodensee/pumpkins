@@ -9,6 +9,7 @@ print = ledwall.print
 
 
 # -- game parameters
+
 WALK_SPEED = 1
 FALL_ACCEL = 0.15
 
@@ -178,24 +179,43 @@ class Player:
         self.y += self.ydir * WALK_SPEED
 
         # -- gravity check
+
+        # get current tile
         cx = int(self.x + 8) // 16
         cy = int(self.y + 16) // 16
 
+        # get previous tile for double-check
+        px = int(self.x + 8) // 16
+        py = int(self.prev_y + 16) // 16
+
+        # save old y for next frame
+        self.prev_y = self.y
+
         if cy < LEV_H:
+            # check if player is colliding with a floor
             if level[cy][cx] == ' ':
+                # no collision - fall down...
                 self.ydir += FALL_ACCEL
                 if self.ydir >= 4:
                     self.ydir = 4
             else:
-                self.ydir = 0
-                self.y = (cy -1) * 16
+                # collision
+                # check if player was still above the floor in last update
+                if level[py][px] == ' ':
+                    # stop falling
+                    self.ydir = 0
+                    # clamp to floor
+                    self.y = (cy -1) * 16
+                else:
+                    # player was already in floor tile -> keep falling...                    # no collision - fall down...
+                    if int(self.y) != self.y:   # ...but only if not exactly on the edge!
+                        self.ydir += FALL_ACCEL
+                        if self.ydir >= 4:
+                            self.ydir = 4
         
-        # -- fall through
+        # -- fall through screen border
         if self.y > ledwall.SCR_H + 16:
             self.y = -16
-
-        # -- other stuff
-        self.prev_y = self.y
 
 
 class Game:
