@@ -226,6 +226,7 @@ class Shot:
         if self.x > player.x -4 and self.x < player.x + 16 -4:
             if self.y > player.y -4 and self.y < player.y + 16 -4:
                 player.getHit()
+                sounds['hit_02'].play()
 
 
 class Player:
