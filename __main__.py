@@ -105,8 +105,6 @@ tiles = {'#': pygame.image.load('gfx/platform.png')
 level = ['                ',
          '                ',
          '                ',
-         '                ',
-         '                ',
          '##    ####    ##',
          '                ',
          '                ',
@@ -122,6 +120,8 @@ level = ['                ',
          '                ',
          '                ',
          '#######  #######',
+         '                ',
+         '                ',
          ]
 
 LEV_W = len(level[0])
