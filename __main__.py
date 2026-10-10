@@ -188,6 +188,10 @@ events = []
 timers = []
 shots = []
 
+def createTimer(name, timeout):
+    timer = Timer(name, timeout)
+    timers.append(timer)
+
 
 # -- the actual game code
 class Timer:
@@ -527,11 +531,9 @@ class Game:
         for e in events:
             print(e)
             if e == 'MAGIC POTION COLLECTED':
-                timer = Timer('SPAWN MAGIC POTION', 120)
-                timers.append(timer)
+                createTimer('SPAWN MAGIC POTION', 120)
             elif e == 'AMMO COLLECTED':
-                timer = Timer('SPAWN AMMO', 120)
-                timers.append(timer)
+                createTimer('SPAWN AMMO', 120)
 
             elif e == 'SPAWN MAGIC POTION':
                 sounds['event_03'].play()
@@ -541,20 +543,16 @@ class Game:
                 self.spawnAmmo()
 
             elif e == 'PLAYER 1 DIED':
-                timer = Timer('HIDE PLAYER 1', 30)
-                timers.append(timer)
+                createTimer('HIDE PLAYER 1', 30)
             elif e == 'PLAYER 2 DIED':
-                timer = Timer('HIDE PLAYER 2', 30)
-                timers.append(timer)
+                createTimer('HIDE PLAYER 2', 30)
 
             elif e == 'HIDE PLAYER 1':
                 self.player1.state = 'dead'
-                timer = Timer('RESPAWN PLAYER 1', 90)
-                timers.append(timer)
+                createTimer('RESPAWN PLAYER 1', 90)
             elif e == 'HIDE PLAYER 2':
                 self.player2.state = 'dead'
-                timer = Timer('RESPAWN PLAYER 2', 90)
-                timers.append(timer)
+                createTimer('RESPAWN PLAYER 2', 90)
 
             elif e == 'RESPAWN PLAYER 1':
                 self.player1.respawn()
