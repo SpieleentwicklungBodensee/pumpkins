@@ -13,7 +13,7 @@ print = ledwall.print
 WALK_SPEED = 1
 FALL_ACCEL = 0.15
 FLY_ACCEL  = 0.1
-FLY_MAXSPEED = 2
+FLY_MAXSPEED = 1.5
 
 
 # -- settings
@@ -37,7 +37,7 @@ if not 'DEFAULT_BRIGHTNESS' in dir():
     DEFAULT_BRIGHTNESS = None
 
 # read settings from command line
-parser = argparse.ArgumentParser(prog='Toolbox Hexagon')
+parser = argparse.ArgumentParser(prog='Pumpkin Pit')
 parser.add_argument('--rendermode', default=None, help='possible modes: plain, led, wide, square, arcade')
 args = parser.parse_args()
 
