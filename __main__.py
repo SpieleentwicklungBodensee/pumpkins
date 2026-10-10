@@ -238,6 +238,8 @@ class Game:
         self.player1.draw(output)
         self.player2.draw(output)
 
+        ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
+
     def update(self):
         for player in self.players:
             player.update()
