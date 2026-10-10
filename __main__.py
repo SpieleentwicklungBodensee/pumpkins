@@ -97,6 +97,7 @@ sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'g2 left': pygame.image.load('gfx/ghost2-left.png'),
            'g2 right': pygame.image.load('gfx/ghost2-right.png'),
            'shot': pygame.image.load('gfx/shot.png'),
+           'dead': pygame.image.load('gfx/dead.png'),
            }
 
 tiles = {'#': pygame.image.load('gfx/platform.png'),
@@ -110,7 +111,7 @@ tiles = {'#': pygame.image.load('gfx/platform.png'),
 level = ['                ',
          '                ',
          '                ',
-         '                ',
+         'o              o',
          '##    ####    ##',
          '                ',
          '                ',
@@ -121,7 +122,7 @@ level = ['                ',
          '                ',
          '                ',
          '      ####      ',
-         '   o        o   ',
+         '                ',
          '  ###      ###  ',
          '                ',
          '                ',
@@ -226,6 +227,7 @@ class Shot:
         if self.x > player.x -4 and self.x < player.x + 16 -4:
             if self.y > player.y -4 and self.y < player.y + 16 -4:
                 player.getHit()
+                self.firestarter.getPoint()
                 sounds['hit_02'].play()
 
 
@@ -233,6 +235,9 @@ class Player:
     def __init__(self, x, y, number):
         self.x = x
         self.y = y
+
+        self.startx = x
+        self.starty = y
 
         self.prev_y = y
 
@@ -246,12 +251,26 @@ class Player:
         self.facedir = 'left'       # 'left' or 'right'
 
         self.number = number
-        self.state = 'pumpkin'      # 'pumpkin' or 'ghost'
+        self.state = 'pumpkin'      # 'pumpkin' or 'ghost', 'dying' or 'dead'
 
+        self.score = 0
         self.ammo = 0
 
+        self.blink = True
+        timers.append(Timer('PLAYER %s STOP BLINKING' % self.number, 30))
+
     def draw(self, output):
-        key = '%s%i %s' % (self.state[0], self.number, self.facedir)
+        if self.blink:
+            if tick % 16 < 8:
+                return
+
+        if self.state == 'dying':
+            key = 'dead'
+        elif self.state == 'dead':
+            return
+        else:
+            key = '%s%i %s' % (self.state[0], self.number, self.facedir)
+
         sprite = sprites[key]
         output.blit(sprite, (self.x, self.y))
 
@@ -325,14 +344,28 @@ class Player:
         self.ground = False
 
     def getHit(self):
+        if self.blink:
+            return
+
         if self.state == 'ghost':
             self.state = 'pumpkin'
         else:
             self.kill()
 
     def kill(self):
-        # to be implemented
-        pass
+        self.state = 'dying'
+        events.append('PLAYER %s DIED' % self.number)
+
+    def respawn(self):
+        self.x = self.startx
+        self.y = self.starty
+        self.state = 'pumpkin'
+
+        self.blink = True
+        timers.append(Timer('PLAYER %s STOP BLINKING' % self.number, 60))
+
+    def getPoint(self):
+        self.score += 1
 
     def update(self):
         tempx = self.x
@@ -451,8 +484,8 @@ class Player:
 
 class Game:
     def __init__(self):
-        self.player1 = Player(48, 240, 1)
-        self.player2 = Player(ledwall.SCR_W - 48 - 16, 240, 2)
+        self.player1 = Player(48, 224, 1)
+        self.player2 = Player(ledwall.SCR_W - 48 - 16, 224, 2)
 
         self.player1.facedir = 'right'
         self.player2.facedir = 'left'
@@ -473,6 +506,9 @@ class Game:
             shot.draw(output)
 
         ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
+
+        ledwall.drawText('%02i' % self.player1.score, x=0, y=1, color=(255, 255, 255))
+        ledwall.drawText('%02i' % self.player2.score, x=ledwall.SCR_W // 8 - 2, y=1, color=(255, 255, 255))
 
     def update(self):
         # -- update players
@@ -503,6 +539,32 @@ class Game:
             elif e == 'SPAWN AMMO':
                 sounds['spawn_ammo'].play()
                 self.spawnAmmo()
+
+            elif e == 'PLAYER 1 DIED':
+                timer = Timer('HIDE PLAYER 1', 30)
+                timers.append(timer)
+            elif e == 'PLAYER 2 DIED':
+                timer = Timer('HIDE PLAYER 2', 30)
+                timers.append(timer)
+
+            elif e == 'HIDE PLAYER 1':
+                self.player1.state = 'dead'
+                timer = Timer('RESPAWN PLAYER 1', 90)
+                timers.append(timer)
+            elif e == 'HIDE PLAYER 2':
+                self.player2.state = 'dead'
+                timer = Timer('RESPAWN PLAYER 2', 90)
+                timers.append(timer)
+
+            elif e == 'RESPAWN PLAYER 1':
+                self.player1.respawn()
+            elif e == 'RESPAWN PLAYER 2':
+                self.player2.respawn()
+
+            elif e == 'PLAYER 1 STOP BLINKING':
+                self.player1.blink = False
+            elif e == 'PLAYER 2 STOP BLINKING':
+                self.player2.blink = False
 
         events.clear()
 
