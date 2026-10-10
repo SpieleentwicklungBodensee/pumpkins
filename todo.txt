@@ -1,0 +1,4 @@
+
+- level sinnvoller aufbauen
+- flug-beschleunigung
+- mini-sprung bugfix
