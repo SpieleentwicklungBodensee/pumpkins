@@ -1,5 +1,6 @@
 import pygame
 import pygame._sdl2.controller
+import argparse
 import time
 import random
 
@@ -12,7 +13,7 @@ WALK_SPEED = 1
 FALL_ACCEL = 0.15
 
 
-# -- LED WALL initialization stuff
+# -- settings
 
 # read settings from settings.py
 # use default values if no settings.py exists
@@ -27,18 +28,31 @@ if not 'RENDER_MODE' in dir():
     # 'sim' = led simulation for uli (deprecated)
     # 'arcade' = for toolbox arcade cabinet
     # 'square' = for square displays
-    RENDER_MODE = 'led'
+    RENDER_MODE = 'plain'
 
 if not 'DEFAULT_BRIGHTNESS' in dir():
+    DEFAULT_BRIGHTNESS = None
+
+# read settings from command line
+parser = argparse.ArgumentParser(prog='Toolbox Hexagon')
+parser.add_argument('--rendermode', default=None, help='possible modes: plain, led, wide, square, arcade')
+args = parser.parse_args()
+
+if args.rendermode:
+    RENDER_MODE = args.rendermode
+
+if DEFAULT_BRIGHTNESS is None:
     if RENDER_MODE == 'led':
-        BRIGHTNESS = -4
+        DEFAULT_BRIGHTNESS = -4
     else:
-        BRIGHTNESS = 0
+        DEFAULT_BRIGHTNESS = 0
 
 DEADZONE = 0.4
 
+
+# -- LED WALL initialization stuff
 output = ledwall.initScreen(RENDER_MODE)
-ledwall.setBrightnessValue(BRIGHTNESS)
+ledwall.setBrightnessValue(DEFAULT_BRIGHTNESS)
 
 
 print('init game controllers...')
