@@ -163,6 +163,30 @@ def setLevelTile(x, y, tile):
     level[y] = level[y][:x] + tile + level[y][x+1:]
 
 
+
+events = []
+timers = []
+
+
+class Timer:
+    def __init__(self, name, timeout):
+        self.name = name
+        self.timeout = timeout
+        self.count = 0
+
+    def update(self):
+        self.count += 1
+
+    def isDue(self):
+        if self.count >= self.timeout:
+            return True
+        
+        return False
+    
+    def reset(self):
+        self.count = 0
+
+
 class Player:
     def __init__(self, x, y, number):
         self.x = x
@@ -336,11 +360,15 @@ class Player:
 
                 setLevelTile(cx, cy, ' ')
 
+                events.append('MAGIC POTION COLLECTED')
+
             elif level[cy][cx] == 'o':
                 # ammo
                 sounds['pickup_03'].play()
                 self.ammo += 1
                 setLevelTile(cx, cy, ' ')
+
+                events.append('AMMO COLLECTED')
         
         # -- fall through screen border
         if self.y > ledwall.SCR_H + 16:
@@ -370,8 +398,33 @@ class Game:
         ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
 
     def update(self):
+        # -- update players
         for player in self.players:
             player.update()
+
+        # -- handle events
+        for e in events:
+            print(e)
+            if e == 'MAGIC POTION COLLECTED':
+                timer = Timer('SPAWN MAGIC POTION', 120)
+                timers.append(timer)
+            elif e == 'AMMO COLLECTED':
+                timer = Timer('SPAWN AMMO', 120)
+                timers.append(timer)
+
+        events.clear()
+
+        # -- handle timers
+        remove = []
+        for t in timers:
+            t.update()
+
+            if t.isDue():
+                events.append(t.name)
+                remove.append(t)
+
+        for r in remove:
+            timers.remove(r)
 
     def keyPress(self, key):
         for i in range(2):
@@ -438,8 +491,6 @@ class Application:
                     self.game.keyPress(e.key)
             elif e.type == pygame.KEYUP:
                 self.game.keyRelease(e.key)
-                        
-
 
     def update(self):
         self.game.update()
