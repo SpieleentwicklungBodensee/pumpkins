@@ -295,7 +295,7 @@ class Player:
             if self.ydir > 0:
                 pass
             elif self.ydir < 0:
-                pass
+                self.yspeed = -1
             else:
                 self.yspeed = 0
         
