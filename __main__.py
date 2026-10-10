@@ -153,6 +153,7 @@ sounds = {'pickup_01': pygame.mixer.Sound('sfx/pickup_01.wav'),
           'ghost_01': pygame.mixer.Sound('sfx/ghost_01.wav'),
           'intro_01': pygame.mixer.Sound('sfx/intro_01.wav'),
           'walking_bg': pygame.mixer.Sound('sfx/walking_bg.wav'),
+          'spawn_ammo': pygame.mixer.Sound('sfx/spawn_ammo.wav'),
           'event_01': pygame.mixer.Sound('sfx/event_01s.wav'),
           'event_03': pygame.mixer.Sound('sfx/event_03.wav'),
           'event_04': pygame.mixer.Sound('sfx/event_04.wav')}
@@ -435,6 +436,7 @@ class Game:
                 sounds['event_03'].play()
                 self.spawnMagicPotion()
             elif e == 'SPAWN AMMO':
+                sounds['spawn_ammo'].play()
                 self.spawnAmmo()
 
         events.clear()
