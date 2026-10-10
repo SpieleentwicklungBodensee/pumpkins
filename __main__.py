@@ -197,8 +197,20 @@ class Player:
             self.ydir = 0
 
     def update(self):
-        self.x += self.xdir * WALK_SPEED
-        self.y += self.ydir * WALK_SPEED
+        tempx = self.x
+        tempy = self.y
+        
+        tempx += self.xdir * WALK_SPEED
+        tempy += self.ydir * WALK_SPEED
+
+        if tempx > ledwall.SCR_W - 16:
+            tempx = ledwall.SCR_W - 16
+        if tempx < 0:
+            tempx = 0
+
+
+        self.x = tempx
+        self.y = tempy
 
         # -- gravity check
 
