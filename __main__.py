@@ -153,6 +153,8 @@ class Player:
         self.xdir = 0
         self.ydir = 0
 
+        self.ground = False
+
         self.facedir = 'left'       # 'left' or 'right'
 
         self.number = number
@@ -182,6 +184,9 @@ class Player:
             self.xdir = 0
 
     def moveUp(self):
+        if self.state == 'pumpkin':
+            if not self.ground:
+                return
         self.ydir = -1
 
     def stopUp(self):
@@ -228,12 +233,12 @@ class Player:
         if cy < LEV_H:
 
             # -- pumpkin movement (just walking)
-
             if self.state == 'pumpkin':
                 # check if player is colliding with a floor
                 if level[cy][cx] != '#':
                     # no collision - fall down...
                     self.ydir += FALL_ACCEL
+                    self.ground = False
                     if self.ydir >= 4:
                         self.ydir = 4
                 else:
@@ -244,10 +249,12 @@ class Player:
                         self.ydir = 0
                         # clamp to floor
                         self.y = (cy -1) * 16
+                        self.ground = True
                     else:
                         # player was already in floor tile -> keep falling...                    # no collision - fall down...
                         if int(self.y) != self.y:   # ...but only if not exactly on the edge!
                             self.ydir += FALL_ACCEL
+                            self.ground = False
                             if self.ydir >= 4:
                                 self.ydir = 4
 
