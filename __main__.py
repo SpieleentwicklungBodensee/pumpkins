@@ -7,6 +7,11 @@ import ledwall
 print = ledwall.print
 
 
+# -- game parameters
+WALK_SPEED = 1
+FALL_ACCEL = 0.15
+
+
 # -- LED WALL initialization stuff
 
 # read settings from settings.py
@@ -123,6 +128,8 @@ class Player:
         self.x = x
         self.y = y
 
+        self.prev_y = y
+
         self.xdir = 0
         self.ydir = 0
 
@@ -138,6 +145,7 @@ class Player:
 
     def moveLeft(self):
         self.xdir = -1
+        self.facedir = 'left'
 
     def stopLeft(self):
         if self.xdir < 0:
@@ -145,14 +153,15 @@ class Player:
 
     def moveRight(self):
         self.xdir = 1
+        self.facedir = 'right'
 
     def stopRight(self):
         if self.xdir > 0:
             self.xdir = 0
 
     def update(self):
-        self.x += self.xdir
-        self.y += self.ydir
+        self.x += self.xdir * WALK_SPEED
+        self.y += self.ydir * WALK_SPEED
 
         # -- gravity check
         cx = int(self.x + 8) // 16
@@ -160,13 +169,19 @@ class Player:
 
         if cy < LEV_H:
             if level[cy][cx] == ' ':
-                self.ydir = 1.5
+                self.ydir += FALL_ACCEL
+                if self.ydir >= 4:
+                    self.ydir = 4
             else:
                 self.ydir = 0
+                self.y = (cy -1) * 16
         
         # -- fall through
         if self.y > ledwall.SCR_H + 16:
             self.y = -16
+
+        # -- other stuff
+        self.prev_y = self.y
 
 
 class Game:
