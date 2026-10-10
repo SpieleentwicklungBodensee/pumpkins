@@ -140,8 +140,8 @@ def findFreeRandomSpot():
             while True:
                 x = int(random.random() * LEV_W)
                 if level[y][x] == '#':
-                    y -= 1
-                    return x, y
+                    if level[y -1][x] == ' ':
+                        return x, y -1
 
 # -- sound stuff
 
