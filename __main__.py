@@ -85,10 +85,7 @@ if not joymode:    # use joystick lib as fallback
 
 
 
-# -- the actual game
-
-clock = pygame.time.Clock()
-tick = 0
+# -- graphic resources
 
 sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'p1 right': pygame.image.load('gfx/pumpkin1-right.png'),
@@ -105,6 +102,8 @@ tiles = {'#': pygame.image.load('gfx/platform.png'),
          'o': pygame.image.load('gfx/ammo.png'),
          }
 
+
+# -- level stuff
 
 level = ['                ',
          '                ',
@@ -131,7 +130,20 @@ level = ['                ',
 LEV_W = len(level[0])
 LEV_H = len(level)
 
+def setLevelTile(x, y, tile):
+    level[y] = level[y][:x] + tile + level[y][x+1:]
 
+def findFreeRandomSpot():
+    while True:
+        y = int(random.random() * LEV_H)
+        if '#' in level[y]:
+            while True:
+                x = int(random.random() * LEV_W)
+                if level[y][x] == '#':
+                    y -= 1
+                    return x, y
+
+# -- sound stuff
 
 pygame.mixer.init()
 
@@ -150,24 +162,25 @@ pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(loops=-1)
 
 
+# -- constants and stuff
+
 PLAYER_KEYS = [(pygame.K_RIGHT, pygame.K_LEFT, pygame.K_DOWN, pygame.K_UP),
                (pygame.K_d, pygame.K_a, pygame.K_s, pygame.K_w),
                ]
+
+clock = pygame.time.Clock()
+tick = 0
 
 RIGHT = 0
 LEFT = 1
 DOWN = 2
 UP = 3
 
-def setLevelTile(x, y, tile):
-    level[y] = level[y][:x] + tile + level[y][x+1:]
-
-
-
 events = []
 timers = []
 
 
+# -- the actual game code
 class Timer:
     def __init__(self, name, timeout):
         self.name = name
@@ -417,6 +430,11 @@ class Game:
                 timer = Timer('SPAWN AMMO', 120)
                 timers.append(timer)
 
+            elif e == 'SPAWN MAGIC POTION':
+                self.spawnMagicPotion()
+            elif e == 'SPAWN AMMO':
+                self.spawnAmmo()
+
         events.clear()
 
         # -- handle timers
@@ -452,6 +470,14 @@ class Game:
                 self.players[i].stopUp()
             elif key == PLAYER_KEYS[i][DOWN]:
                 self.players[i].stopDown()
+    
+    def spawnMagicPotion(self):
+        x, y = findFreeRandomSpot()
+        setLevelTile(x, y, '&')
+
+    def spawnAmmo(self):
+        x, y = findFreeRandomSpot()
+        setLevelTile(x, y, 'o')
 
 
 class Application:
