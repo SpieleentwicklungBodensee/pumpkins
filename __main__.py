@@ -286,8 +286,9 @@ class Player:
             self.ydir = 1
 
     def stopDown(self):
-        if self.ydir > 0:
-            self.ydir = 0
+        if self.state == 'ghost':
+            if self.ydir > 0:
+                self.ydir = 0
 
     def shoot(self):
         if self.ammo == 0:
