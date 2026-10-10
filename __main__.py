@@ -286,6 +286,7 @@ class Player:
             return
 
         self.ammo -= 1
+        sounds['shoot_01'].play()
         shot = Shot(self.x, self.y, 1 if self.facedir == 'right' else -1)
         shots.append(shot)
 
@@ -498,7 +499,6 @@ class Game:
             elif key == PLAYER_KEYS[i][DOWN]:
                 self.players[i].moveDown()
             elif key == PLAYER_KEYS[i][SHOOT]:
-                sounds['shoot_01'].play()
                 self.players[i].shoot()
 
     def keyRelease(self, key):
