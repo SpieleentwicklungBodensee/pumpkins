@@ -139,10 +139,15 @@ sounds = {'pickup_01': pygame.mixer.Sound('sfx/pickup_01.wav'),
           'pickup_02': pygame.mixer.Sound('sfx/pickup_02.wav'),
           'pickup_03': pygame.mixer.Sound('sfx/pickup_03.wav'),
           'ghost_01': pygame.mixer.Sound('sfx/ghost_01.wav'),
-          'grumblin_01l': pygame.mixer.Sound('sfx/grumblin_01l.wav'),
+          'intro_01': pygame.mixer.Sound('sfx/intro_01.wav'),
           'walking_bg': pygame.mixer.Sound('sfx/walking_bg.wav'),
           'event_01': pygame.mixer.Sound('sfx/event_01s.wav'),
           'event_04': pygame.mixer.Sound('sfx/event_04.wav')}
+
+
+pygame.mixer.music.load('sfx/grumblin_01l.wav')
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(loops=-1)
 
 
 PLAYER_KEYS = [(pygame.K_RIGHT, pygame.K_LEFT, pygame.K_DOWN, pygame.K_UP),
