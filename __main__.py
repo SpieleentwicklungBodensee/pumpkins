@@ -370,6 +370,12 @@ class Player:
         if tempx < 0:
             tempx = 0
 
+        if self.state == 'ghost':
+            if tempy > ledwall.SCR_H - 16:
+                tempy = ledwall.SCR_H - 16
+            if tempy < 0:
+                tempy = 0
+
         self.x = tempx
         self.y = tempy
 
