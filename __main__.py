@@ -209,16 +209,23 @@ class Timer:
 
 
 class Shot:
-    def __init__(self, x, y, xdir):
+    def __init__(self, x, y, xdir, firestarter):
         self.x = x
         self.y = y
         self.xdir = xdir
+
+        self.firestarter = firestarter
 
     def draw(self, output):
         output.blit(sprites['shot'], (self.x, self.y))
 
     def update(self):
         self.x += self.xdir * SHOT_SPEED
+
+    def checkCollision(self, player):
+        if self.x > player.x -4 and self.x < player.x + 16 -4:
+            if self.y > player.y -4 and self.y < player.y + 16 -4:
+                player.getHit()
 
 
 class Player:
@@ -287,7 +294,8 @@ class Player:
 
         self.ammo -= 1
         sounds['shoot_01'].play()
-        shot = Shot(self.x, self.y, 1 if self.facedir == 'right' else -1)
+        
+        shot = Shot(self.x, self.y, 1 if self.facedir == 'right' else -1, self)
         shots.append(shot)
 
     def becomeGhost(self):
@@ -313,6 +321,16 @@ class Player:
             self.yspeed = 4
 
         self.ground = False
+
+    def getHit(self):
+        if self.state == 'ghost':
+            self.state = 'pumpkin'
+        else:
+            self.kill()
+
+    def kill(self):
+        # to be implemented
+        pass
 
     def update(self):
         tempx = self.x
@@ -456,6 +474,10 @@ class Game:
         # -- update shots
         for shot in shots:
             shot.update()
+
+            for player in self.players:
+                if player != shot.firestarter:
+                    shot.checkCollision(player)
 
         # -- handle events
         for e in events:
