@@ -269,6 +269,13 @@ def particles_update():
     for particle in particles_old:
         if not particle.update(): particles.append(particle)
 
+def particles_reset_juice():
+    global particles
+    particles_old=particles
+    particles=[]
+    for particle in particles_old:
+        if particle.type != PARTICLE_TYPE_JUICE: particles.append(particle)
+
 def particles_draw():
     for particle in particles:
         particle.draw()
@@ -726,6 +733,8 @@ class Game:
         global levelnumber
         levelnumber += 1
         initLevel(levelnumber % len(levels))
+
+        particles_reset_juice()
 
     def render(self):
         if self.blank:
