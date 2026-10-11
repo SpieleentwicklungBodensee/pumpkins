@@ -14,6 +14,7 @@ FALL_ACCEL = 0.15
 FLY_ACCEL  = 0.1
 FLY_MAXSPEED = 1.5
 SHOT_SPEED = 8
+WIN_SCORE = 1
 
 
 # -- settings
@@ -460,6 +461,9 @@ class Player:
     def getPoint(self):
         self.score += 1
 
+        if self.score == WIN_SCORE:
+            events.append('PLAYER %s WINS' % self.number)
+
     def update(self):
         if self.state in ('dying', 'dead'):
             return
@@ -598,7 +602,16 @@ class Game:
 
         self.players = [self.player1, self.player2]
 
+        self.winner = None
+        self.message = ''
+        self.blank = False
+
     def render(self):
+        if self.blank:
+            output.fill((0, 0, 0))
+            ledwall.drawText(self.message, 0, 11, (192, 255, 0), 1, center=True)
+            return
+
         for y in range(LEV_H):
             for x in range(LEV_W):
                 tile = level[y][x]
@@ -616,23 +629,27 @@ class Game:
         for i in range(self.player2.ammo):
             output.blit(sprites['shot'], (ledwall.SCR_W - 11 - i * 8, 13))
 
-        ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
+        #ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
 
         ledwall.drawText('%02i' % self.player1.score, x=0, y=1, color=(255, 255, 255))
         ledwall.drawText('%02i' % self.player2.score, x=ledwall.SCR_W // 8 - 2, y=1, color=(255, 255, 255))
 
+        if tick % 32 > 8:
+            ledwall.drawText(self.message, 0, 11, (192, 255, 0), 1, center=True)
+
     def update(self):
-        # -- update players
-        for player in self.players:
-            player.update()
-
-        # -- update shots
-        for shot in shots:
-            shot.update()
-
+        if not self.winner:
+            # -- update players
             for player in self.players:
-                if player != shot.firestarter:
-                    shot.checkCollision(player)
+                player.update()
+
+            # -- update shots
+            for shot in shots:
+                shot.update()
+
+                for player in self.players:
+                    if player != shot.firestarter:
+                        shot.checkCollision(player)
 
         # -- handle events
         for e in events:
@@ -670,6 +687,20 @@ class Game:
                 self.player1.blink = False
             elif e == 'PLAYER 2 STOP BLINKING':
                 self.player2.blink = False
+
+            elif e == 'PLAYER 1 WINS':
+                self.setWinner(1)
+            elif e == 'PLAYER 2 WINS':
+                self.setWinner(2)
+
+            elif e == 'SHOW WINNER':
+                self.message = 'PLAYER %i WINS!' % self.winner
+                createTimer('BLANK SCREEN', 180)
+            elif e == 'BLANK SCREEN':
+                self.blank = True
+                createTimer('RESTART GAME', 60)
+            elif e == 'RESTART GAME':
+                self.restart()
 
         events.clear()
 
@@ -772,6 +803,18 @@ class Game:
     def spawnAmmo(self):
         x, y = findFreeRandomSpot()
         setLevelTile(x, y, 'o')
+
+    def setWinner(self, number):
+        self.winner = number
+        
+        shots.clear()
+        events.clear()
+        timers.clear()
+        
+        createTimer('SHOW WINNER', 60)
+
+    def restart(self):
+        self.__init__()
 
 
 class Application:
