@@ -100,16 +100,26 @@ sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'p1 right': pygame.image.load('gfx/pumpkin1-right.png'),
            'p2 left': pygame.image.load('gfx/pumpkin2-left.png'),
            'p2 right': pygame.image.load('gfx/pumpkin2-right.png'),
-           'g1 left': pygame.image.load('gfx/ghost1_left_1.png'),
-           'g1 right': pygame.transform.flip(pygame.image.load('gfx/ghost1-right.png'),True, False),
-           'g2 left': pygame.image.load('gfx/ghost1_left_2.png'),
-           'g2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2-right.png'),True, False),
-           'g3 left': pygame.image.load('gfx/ghost1_left_3.png'),
-           'g3 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_3.png'),True, False),
-           'g4 left': pygame.image.load('gfx/ghost1_left_4.png'),
-           'g4 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_4.png'),True, False),
-           'g5 left': pygame.image.load('gfx/ghost1_left_5.png'),
-           'g5 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_5.png'),True, False),
+           'g1_1 left': pygame.image.load('gfx/ghost1_left_1.png'),
+           'g1_1 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_1.png'),True, False),
+           'g2_1 left': pygame.image.load('gfx/ghost1_left_2.png'),
+           'g2_1 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_2.png'),True, False),
+           'g3_1 left': pygame.image.load('gfx/ghost1_left_3.png'),
+           'g3_1 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_3.png'),True, False),
+           'g4_1 left': pygame.image.load('gfx/ghost1_left_4.png'),
+           'g4_1 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_4.png'),True, False),
+           'g5_1 left': pygame.image.load('gfx/ghost1_left_5.png'),
+           'g5_1 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_5.png'),True, False),
+           'g1_2 left': pygame.image.load('gfx/ghost2_left_1.png'),
+           'g1_2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2_left_1.png'),True, False),
+           'g2_2 left': pygame.image.load('gfx/ghost2_left_2.png'),
+           'g2_2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2_left_2.png'),True, False),
+           'g3_2 left': pygame.image.load('gfx/ghost2_left_3.png'),
+           'g3_2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2_left_3.png'),True, False),
+           'g4_2 left': pygame.image.load('gfx/ghost2_left_4.png'),
+           'g4_2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2_left_4.png'),True, False),
+           'g5_2 left': pygame.image.load('gfx/ghost2_left_5.png'),
+           'g5_2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2_left_5.png'),True, False),
            'shot': pygame.image.load('gfx/shot.png'),
            'dead': pygame.image.load('gfx/dead.png'),
            }
@@ -296,17 +306,29 @@ class Player:
         else:
             key = '%s%i %s' % (self.state[0], self.number, self.facedir)
 
-        if self.state == 'ghost':
-            if tick % 16 < 4:
-                key = 'g1 %s' %(self.facedir)
-            elif tick % 16 < 8:
-                key = 'g2 %s' %(self.facedir)
-            elif tick % 16 < 12:
-                key = 'g3 %s' %(self.facedir)
-            elif tick % 16 < 14:
-                key = 'g4 %s' %(self.facedir)
+        if self.state == 'ghost'and self.number == 1:
+            if tick % 32 < 8:
+                key = 'g1_1 %s' %(self.facedir)
+            elif tick % 32 < 14:
+                key = 'g2_1 %s' %(self.facedir)
+            elif tick % 32 < 22:
+                key = 'g3_1 %s' %(self.facedir)
+            elif tick % 32 < 30:
+                key = 'g4_1 %s' %(self.facedir)
             else:
-                key = 'g5 %s' %(self.facedir)
+                key = 'g5_1 %s' %(self.facedir)
+
+        elif self.state == 'ghost' and self.number == 2:
+            if tick % 32 < 8:
+                key = 'g1_2 %s' %(self.facedir)
+            elif tick % 32 < 14:
+                key = 'g2_2 %s' %(self.facedir)
+            elif tick % 32 < 22:
+                key = 'g3_2 %s' %(self.facedir)
+            elif tick % 32 < 30:
+                key = 'g4_2 %s' %(self.facedir)
+            else:
+                key = 'g5_2 %s' %(self.facedir)
         
         sprite = sprites[key]
 
