@@ -16,6 +16,10 @@ FLY_MAXSPEED = 1.5
 SHOT_SPEED = 8
 WIN_SCORE = 1
 
+ENABLE_PARTICLE_JUICE = True
+ENABLE_PARTICLE_JUICE_FLOOR = True
+ENABLE_PARTICLE_RAIN = True
+
 
 # -- settings
 
@@ -226,6 +230,78 @@ def findFreeRandomSpot():
                 if level[y][x] == '#':
                     if level[y -1][x] == ' ':
                         return x, y -1
+
+# -- particle stuff
+
+PARTICLE_TYPE_RAIN = 1
+PARTICLE_TYPE_JUICE = 2
+
+class Particle:
+    def __init__(self): # rain by default
+        self.x = int(random.random()*ledwall.SCR_W)
+        self.y = int(random.random()*ledwall.SCR_H + 16) - 16
+        self.w = 1
+        self.h = 16
+        self.speed = 10.0
+        self.type = PARTICLE_TYPE_RAIN
+    def update(self):
+        delete_me = False
+        if self.type == PARTICLE_TYPE_RAIN:
+            self.x += 0.1
+            self.y += self.speed
+            if self.x > ledwall.SCR_W: self.x -= ledwall.SCR_W
+            if self.y > ledwall.SCR_H: self.y -= ledwall.SCR_H + 16
+        elif self.type == PARTICLE_TYPE_JUICE:
+            self.h += self.speed
+            if self.h > 16: delete_me = True
+        return delete_me
+    def draw(self):
+        color=(255, 0, 255)
+        if self.type == PARTICLE_TYPE_RAIN: color=(0, 0, 255)
+        elif self.type == PARTICLE_TYPE_JUICE: color=(255, 128, 0)
+        pygame.draw.rect(output, color, (self.x, self.y, self.w, self.h))
+
+def particles_update():
+    global particles
+    particles_old=particles
+    particles=[]
+    for particle in particles_old:
+        if not particle.update(): particles.append(particle)
+
+def particles_draw():
+    for particle in particles:
+        particle.draw()
+
+def particles_create_rain():
+    for i in range(100):
+        particles.append(Particle())
+
+def particles_create_juice_floor(x, y):
+    for i in range(16):
+        particle = Particle()
+        particle.x = x + 2 + int(random.random() * 12)
+        particle.y = y + 16
+        particle.w = 1
+        particle.h = 1
+        particle.speed = 0.01 + random.random() * 0.5
+        particle.type = PARTICLE_TYPE_JUICE
+        particles.append(particle)
+
+def particles_create_juice_death(x, y):
+    for i in range(32):
+        particle = Particle()
+        particle.x = x + 2 + int(random.random() * 12)
+        particle.y = y + 2 + int(random.random() * 12)
+        particle.w = 1
+        particle.h = 1
+        particle.speed = 0.1 + random.random() * 0.5
+        particle.type = PARTICLE_TYPE_JUICE
+        particles.append(particle)
+
+particles = []
+
+if ENABLE_PARTICLE_RAIN:
+    particles_create_rain()
 
 # -- sound stuff
 
@@ -483,6 +559,9 @@ class Player:
         self.state = 'dying'
         events.append('PLAYER %s DIED' % self.number)
 
+        if ENABLE_PARTICLE_JUICE:
+            particles_create_juice_death(self.x, self.y)    
+
     def respawn(self):
         self.x = self.startx
         self.y = self.starty
@@ -583,6 +662,9 @@ class Player:
                         # clamp to floor
                         self.y = (cy -1) * 16
                         self.ground = True
+
+                        if ENABLE_PARTICLE_JUICE_FLOOR:
+                            particles_create_juice_floor(self.x, self.y)
                     else:
                         # player was already in floor tile -> keep falling...                    # no collision - fall down...
                         if int(self.y) != self.y:   # ...but only if not exactly on the edge!
@@ -658,6 +740,8 @@ class Game:
 
         self.player1.draw(output)
         self.player2.draw(output)
+        
+        particles_draw()
 
         for shot in shots:
             shot.draw(output)
@@ -688,6 +772,9 @@ class Game:
                 for player in self.players:
                     if player != shot.firestarter:
                         shot.checkCollision(player)
+
+        # -- update particles
+        particles_update()
 
         # -- handle events
         for e in events:
