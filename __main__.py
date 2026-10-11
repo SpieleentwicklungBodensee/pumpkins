@@ -123,7 +123,7 @@ level = ['                ',
          ' &            & ',
          '####        ####',
          '                ',
-         '                ',
+         '      o  o      ',
          '      ####      ',
          '                ',
          '  ###      ###  ',
@@ -234,7 +234,7 @@ class Shot:
         if player.state in ('dead', 'dying'):
             return
 
-        if self.x > player.x -4 and self.x < player.x + 16 -4:
+        if self.x > player.x -6 and self.x < player.x + 16 -6:
             if self.y > player.y -4 and self.y < player.y + 16 -4:
                 player.getHit()
                 self.firestarter.getPoint()
@@ -361,6 +361,8 @@ class Player:
 
         if self.state == 'ghost':
             self.state = 'pumpkin'
+            self.blink = True
+            timers.append(Timer('PLAYER %s STOP BLINKING' % self.number, 30))
         else:
             self.kill()
 
