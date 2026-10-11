@@ -241,6 +241,9 @@ class Shot:
             if self.y > player.y -4 and self.y < player.y + 16 -4:
                 if player.getHit():
                     self.firestarter.getPoint()
+                if player.state == 'pumpkin':
+                    sounds['event_04'].play()
+                else:
                     sounds['hit_02'].play()
 
 
