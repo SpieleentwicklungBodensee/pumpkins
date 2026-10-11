@@ -52,6 +52,7 @@ if args.rendermode:
 if DEFAULT_BRIGHTNESS is None:
     if RENDER_MODE == 'led':
         DEFAULT_BRIGHTNESS = -4
+        DEFAULT_BRIGHTNESS = 0      # TODO implement brightness for all sprites, then changeable brightness makes sense again
     else:
         DEFAULT_BRIGHTNESS = 0
 
