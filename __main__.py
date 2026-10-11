@@ -133,53 +133,63 @@ tiles = {'#': pygame.image.load('gfx/platform.png'),
 
 # -- level stuff
 
-level = ['                ',
-         '                ',
-         '                ',
-         'o              o',
-         '##    ####    ##',
-         '                ',
-         '                ',
-         '   ##      ##   ',
-         '                ',
-         ' &            & ',
-         '####        ####',
-         '                ',
-         '      o  o      ',
-         '      ####      ',
-         '                ',
-         '  ###      ###  ',
-         '                ',
-         '                ',
-         '######    ######',
-         '                ',
-         ]
+level_1 = ['                ',
+           '                ',
+           '                ',
+           'o              o',
+           '##    ####    ##',
+           '                ',
+           '                ',
+           '   ##      ##   ',
+           '                ',
+           ' &            & ',
+           '####        ####',
+           '                ',
+           '      o  o      ',
+           '      ####      ',
+           '                ',
+           '  ###      ###  ',
+           '                ',
+           '                ',
+           '######    ######',
+           '                ',
+           ]
 
-level2 =['                ',
-         '                ',
-         '                ',
-         '       oo       ',
-         '###    ##    ###',
-         '                ',
-         '     &    &     ',
-         '   ##########   ',
-         '                ',
-         '                ',
-         '####        ####',
-         '                ',
-         '                ',
-         '                ',
-         '       oo       ',
-         '   ### ## ###   ',
-         '                ',
-         '                ',
-         '  ## ####### ## ',
-         '                ',
-         ]
-         
+level_2 =['                ',
+          '                ',
+          '                ',
+          '       oo       ',
+          '###    ##    ###',
+          '                ',
+          '     &    &     ',
+          '   ##########   ',
+          '                ',
+          '                ',
+          '####        ####',
+          '                ',
+          '                ',
+          '                ',
+          '       oo       ',
+          '   ### ## ###   ',
+          '                ',
+          '                ',
+          '  ## ####### ## ',
+          '                ',
+          ]
 
-LEV_W = len(level[0])
-LEV_H = len(level)
+levels = [level_1, level_2]
+level = []
+
+def initLevel(number):
+    level.clear()
+
+    for line in levels[number]:
+        level.append(line)
+
+levelnumber = -1
+
+LEV_W = len(level_1[0])
+LEV_H = len(level_1)
 
 def setLevelTile(x, y, tile):
     level[y] = level[y][:x] + tile + level[y][x+1:]
@@ -605,6 +615,10 @@ class Game:
         self.winner = None
         self.message = ''
         self.blank = False
+
+        global levelnumber
+        levelnumber += 1
+        initLevel(levelnumber % len(levels))
 
     def render(self):
         if self.blank:
