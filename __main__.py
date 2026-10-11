@@ -127,7 +127,8 @@ sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'g5_2 left': pygame.image.load('gfx/ghost2_left_5.png'),
            'g5_2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2_left_5.png'),True, False),
            'shot': pygame.image.load('gfx/shot.png'),
-           'dead': pygame.image.load('gfx/dead.png'),
+           'dead left': pygame.image.load('gfx/skull-left.png'),
+           'dead right': pygame.image.load('gfx/skull-right.png'),
            }
 
 tiles = {'#': pygame.image.load('gfx/platform.png'),
@@ -242,7 +243,7 @@ class Particle:
         self.y = int(random.random()*ledwall.SCR_H + 16) - 16
         self.w = 1
         self.h = 16
-        self.speed = 10.0
+        self.speed = 7.5
         self.type = PARTICLE_TYPE_RAIN
     def update(self):
         delete_me = False
@@ -257,7 +258,7 @@ class Particle:
         return delete_me
     def draw(self):
         color=(255, 0, 255)
-        if self.type == PARTICLE_TYPE_RAIN: color=(0, 0, 255)
+        if self.type == PARTICLE_TYPE_RAIN: color=(0, 0, 80)
         elif self.type == PARTICLE_TYPE_JUICE: color=(255, 128, 0)
         pygame.draw.rect(output, color, (self.x, self.y, self.w, self.h))
 
@@ -434,7 +435,7 @@ class Player:
                 return
 
         if self.state == 'dying':
-            key = 'dead'
+            key = 'dead %s' % self.facedir
         elif self.state == 'dead':
             return
         else:
