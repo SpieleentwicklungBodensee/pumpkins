@@ -5,7 +5,6 @@ import time
 import random
 
 import ledwall
-print = ledwall.print
 
 
 # -- game parameters
@@ -37,9 +36,13 @@ if not 'RENDER_MODE' in dir():
 if not 'DEFAULT_BRIGHTNESS' in dir():
     DEFAULT_BRIGHTNESS = None
 
+if not 'DEBUG' in dir():
+    DEBUG = False
+
 # read settings from command line
 parser = argparse.ArgumentParser(prog='Pumpkin Pit')
 parser.add_argument('--rendermode', default=None, help='possible modes: plain, led, wide, square, arcade')
+parser.add_argument('--debug', default=False, help='enter debug mode')
 args = parser.parse_args()
 
 if args.rendermode:
@@ -51,7 +54,11 @@ if DEFAULT_BRIGHTNESS is None:
     else:
         DEFAULT_BRIGHTNESS = 0
 
-DEADZONE = 0.4
+if args.debug:
+    DEBUG = args.debug
+
+if DEBUG:
+    print = ledwall.print
 
 
 # -- LED WALL initialization stuff
@@ -84,6 +91,7 @@ if not joymode:    # use joystick lib as fallback
             joy.init()
             print(' - ' + joy.get_name())
 
+DEADZONE = 0.4
 
 
 # -- graphic resources
