@@ -231,6 +231,9 @@ class Shot:
         self.x += self.xdir * SHOT_SPEED
 
     def checkCollision(self, player):
+        if player.state in ('dead', 'dying'):
+            return
+
         if self.x > player.x -4 and self.x < player.x + 16 -4:
             if self.y > player.y -4 and self.y < player.y + 16 -4:
                 player.getHit()
