@@ -431,12 +431,14 @@ class Player:
 
         # -- gravity check
 
-        # get current tile BELOW player
-        cx = int(self.x + 8) // 16
+        # get current tiles BELOW player
+        cx1 = int(self.x + 3) // 16
+        cx2 = int(self.x + 13) // 16
         cy = int(self.y + 16) // 16
 
         # get previous tile for double-check
-        px = int(self.x + 8) // 16
+        px1 = int(self.x + 3) // 16
+        px2 = int(self.x + 13) // 16
         py = int(self.prev_y + 16) // 16
 
         # save old y for next frame
@@ -447,13 +449,13 @@ class Player:
             # -- pumpkin movement (just walking)
             if self.state == 'pumpkin':
                 # check if player is colliding with a floor
-                if level[cy][cx] != '#':
+                if level[cy][cx1] != '#' and level[cy][cx2] != '#':
                     # no collision - fall down...
                     self.fallDown()
                 else:
                     # collision
                     # check if player was still above the floor in last update
-                    if level[py][px] != '#':
+                    if level[py][px1] != '#' and level[py][px2] != '#':
                         # stop falling
                         self.ydir = 0
                         # clamp to floor
