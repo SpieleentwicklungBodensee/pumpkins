@@ -566,9 +566,12 @@ class Game:
         for shot in shots:
             shot.draw(output)
 
+        for i in range(self.player1.ammo):
+            output.blit(tiles['o'], (-2 + i * 8, 10))
+        for i in range(self.player2.ammo):
+            output.blit(tiles['o'], (ledwall.SCR_W - 13 - i * 8, 10))
+
         ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
-        output.blit(tiles['o'], (-2, 10))
-        output.blit(tiles['o'], (ledwall.SCR_W - 13, 10))
 
         ledwall.drawText('%02i' % self.player1.score, x=0, y=1, color=(255, 255, 255))
         ledwall.drawText('%02i' % self.player2.score, x=ledwall.SCR_W // 8 - 2, y=1, color=(255, 255, 255))
