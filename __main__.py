@@ -319,6 +319,8 @@ class Player:
     def shoot(self):
         if self.ammo == 0:
             return
+        if self.state in ('dying', 'dead'):
+            return
 
         self.ammo -= 1
         sounds['shoot_01'].play()
@@ -367,6 +369,7 @@ class Player:
         self.x = self.startx
         self.y = self.starty
         self.state = 'pumpkin'
+        self.ammo = 0
 
         self.blink = True
         timers.append(Timer('PLAYER %s STOP BLINKING' % self.number, 60))
