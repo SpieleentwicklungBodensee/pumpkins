@@ -375,6 +375,8 @@ class Player:
         self.score += 1
 
     def update(self):
+        if self.state in ('dying', 'dead'):
+            return
         tempx = self.x
         tempy = self.y
 
