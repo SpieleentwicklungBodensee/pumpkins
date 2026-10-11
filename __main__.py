@@ -236,6 +236,7 @@ def findFreeRandomSpot():
 
 PARTICLE_TYPE_RAIN = 1
 PARTICLE_TYPE_JUICE = 2
+PARTICLE_TYPE_DEATH = 3
 
 class Particle:
     def __init__(self): # rain by default
@@ -255,11 +256,18 @@ class Particle:
         elif self.type == PARTICLE_TYPE_JUICE:
             self.h += self.speed
             if self.h > 16: delete_me = True
+        elif self.type == PARTICLE_TYPE_DEATH:
+            if self.speed >= 0.0:
+                self.w += self.speed
+            else:
+               self.x += self.speed
+               self.w -= self.speed
+            if self.w > 16: delete_me = True
         return delete_me
     def draw(self):
         color=(255, 0, 255)
         if self.type == PARTICLE_TYPE_RAIN: color=(0, 0, 80)
-        elif self.type == PARTICLE_TYPE_JUICE: color=(255, 128, 0)
+        else: color=(255, 128, 0)
         pygame.draw.rect(output, color, (self.x, self.y, self.w, self.h))
 
 def particles_update():
@@ -295,15 +303,15 @@ def particles_create_juice_floor(x, y):
         particle.type = PARTICLE_TYPE_JUICE
         particles.append(particle)
 
-def particles_create_juice_death(x, y):
+def particles_create_juice_death(x, y, xdir):
     for i in range(32):
         particle = Particle()
         particle.x = x + 2 + int(random.random() * 12)
         particle.y = y + 2 + int(random.random() * 12)
         particle.w = 1
         particle.h = 1
-        particle.speed = 0.1 + random.random() * 0.5
-        particle.type = PARTICLE_TYPE_JUICE
+        particle.speed = (0.1 + random.random()) * xdir
+        particle.type = PARTICLE_TYPE_DEATH
         particles.append(particle)
 
 particles = []
@@ -399,7 +407,7 @@ class Shot:
 
         if self.x > player.x -6 and self.x < player.x + 16 -6:
             if self.y > player.y -4 and self.y < player.y + 16 -4:
-                if player.getHit():
+                if player.getHit(self.xdir):
                     self.firestarter.getPoint()
                 if player.state == 'pumpkin':
                     sounds['event_04'].play()
@@ -550,7 +558,7 @@ class Player:
 
         self.ground = False
 
-    def getHit(self):
+    def getHit(self, xdir):
         if self.blink:
             return False
 
@@ -560,15 +568,15 @@ class Player:
             timers.append(Timer('PLAYER %s STOP BLINKING' % self.number, 30))
             return False
         else:
-            self.kill()
+            self.kill(xdir)
             return True
 
-    def kill(self):
+    def kill(self, xdir):
         self.state = 'dying'
         events.append('PLAYER %s DIED' % self.number)
 
         if ENABLE_PARTICLE_JUICE:
-            particles_create_juice_death(self.x, self.y)    
+            particles_create_juice_death(self.x, self.y, xdir)    
 
     def respawn(self):
         self.x = self.startx
