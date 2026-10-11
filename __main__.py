@@ -253,7 +253,7 @@ class Player:
         self.xspeed = 0
         self.yspeed = 0
 
-        self.ground = False
+        self.ground = True
 
         self.facedir = 'left'       # 'left' or 'right'
 
