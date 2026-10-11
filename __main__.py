@@ -93,12 +93,15 @@ sprites = {'p1 left': pygame.image.load('gfx/pumpkin1-left.png'),
            'p2 left': pygame.image.load('gfx/pumpkin2-left.png'),
            'p2 right': pygame.image.load('gfx/pumpkin2-right.png'),
            'g1 left': pygame.image.load('gfx/ghost1_left_1.png'),
-           'g1 right': pygame.image.load('gfx/ghost1-right.png'),
+           'g1 right': pygame.transform.flip(pygame.image.load('gfx/ghost1-right.png'),True, False),
            'g2 left': pygame.image.load('gfx/ghost1_left_2.png'),
-           'g2 right': pygame.image.load('gfx/ghost2-right.png'),
+           'g2 right': pygame.transform.flip(pygame.image.load('gfx/ghost2-right.png'),True, False),
            'g3 left': pygame.image.load('gfx/ghost1_left_3.png'),
+           'g3 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_3.png'),True, False),
            'g4 left': pygame.image.load('gfx/ghost1_left_4.png'),
+           'g4 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_4.png'),True, False),
            'g5 left': pygame.image.load('gfx/ghost1_left_5.png'),
+           'g5 right': pygame.transform.flip(pygame.image.load('gfx/ghost1_left_5.png'),True, False),
            'shot': pygame.image.load('gfx/shot.png'),
            'dead': pygame.image.load('gfx/dead.png'),
            }
@@ -281,6 +284,18 @@ class Player:
         else:
             key = '%s%i %s' % (self.state[0], self.number, self.facedir)
 
+        if self.state == 'ghost':
+            if tick % 16 < 4:
+                key = 'g1 %s' %(self.facedir)
+            elif tick % 16 < 8:
+                key = 'g2 %s' %(self.facedir)
+            elif tick % 16 < 12:
+                key = 'g3 %s' %(self.facedir)
+            elif tick % 16 < 14:
+                key = 'g4 %s' %(self.facedir)
+            else:
+                key = 'g5 %s' %(self.facedir)
+        
         sprite = sprites[key]
         output.blit(sprite, (self.x, self.y))
 
