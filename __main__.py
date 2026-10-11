@@ -271,6 +271,7 @@ class Player:
         self.yspeed = 0
 
         self.ground = True
+        self.roll = 0
 
         self.facedir = 'left'       # 'left' or 'right'
 
@@ -308,6 +309,10 @@ class Player:
                 key = 'g5 %s' %(self.facedir)
         
         sprite = sprites[key]
+
+        if self.state == 'pumpkin':
+            sprite = pygame.transform.rotate(sprite, 90 * round(self.roll))
+
         output.blit(sprite, (self.x, self.y))
 
     def moveLeft(self):
@@ -413,6 +418,12 @@ class Player:
     def update(self):
         if self.state in ('dying', 'dead'):
             return
+
+        if self.ground:
+            self.roll -= 0.15 * self.xdir
+        if self.ydir < 0.0:
+            self.roll = 0.0
+
         tempx = self.x
         tempy = self.y
 
