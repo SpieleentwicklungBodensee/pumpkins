@@ -51,6 +51,9 @@ if not 'DEFAULT_BRIGHTNESS' in dir():
 if not 'DEBUG' in dir():
     DEBUG = False
 
+if not 'MUSIC_ENABLED' in dir():
+    MUSIC_ENABLED = True
+
 # read settings from command line
 parser = argparse.ArgumentParser(prog='Pumpkin Pit')
 parser.add_argument('--rendermode', default=None, help='possible modes: plain, led, wide, square, arcade')
@@ -1143,6 +1146,15 @@ class Application:
                     ledwall.enableOverlay(not ledwall.showOverlay)
                 elif e.key == pygame.K_F11:
                     pygame.display.toggle_fullscreen()
+
+                elif e.key == pygame.K_m:
+                    global MUSIC_ENABLED
+                    MUSIC_ENABLED = not MUSIC_ENABLED
+
+                    if MUSIC_ENABLED:
+                        pygame.mixer.music.play(loops=-1)
+                    else:
+                        pygame.mixer.music.stop()
 
                 else:
                     self.currentScreen.keyPress(e.key)
