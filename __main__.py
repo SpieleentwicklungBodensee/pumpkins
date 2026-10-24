@@ -14,11 +14,18 @@ FALL_ACCEL = 0.15
 FLY_ACCEL  = 0.1
 FLY_MAXSPEED = 1.5
 SHOT_SPEED = 8
-WIN_SCORE = 1
+WIN_SCORE_TOTAL = 3
 
 ENABLE_PARTICLE_JUICE = True
 ENABLE_PARTICLE_JUICE_FLOOR = True
 ENABLE_PARTICLE_RAIN = True
+
+
+# -- colors
+
+COL_PURPLE = (192, 112, 230)
+COL_GREEN = (192, 255, 0)
+COL_WHITE = (255, 255, 255)
 
 
 # -- settings
@@ -366,6 +373,8 @@ def createTimer(name, timeout):
     timer = Timer(name, timeout)
     timers.append(timer)
 
+    return timer
+
 
 # -- the actual game code
 class Timer:
@@ -589,9 +598,7 @@ class Player:
 
     def getPoint(self):
         self.score += 1
-
-        if self.score == WIN_SCORE:
-            events.append('PLAYER %s WINS' % self.number)
+        events.append('PLAYER %s WINS ROUND' % self.number)
 
     def update(self):
         if self.state in ('dying', 'dead'):
@@ -724,8 +731,35 @@ class Player:
             self.y = -16
 
 
-class Game:
+class Screen:
     def __init__(self):
+        pass
+
+    def render(self):
+        pass
+
+    def update(self):
+        pass
+
+    def keyPress(self, key):
+        pass
+
+    def keyRelease(self, key):
+        pass
+
+    def controllerAxisMotion(self, p, axis, value):
+        pass
+
+    def controllerButtonPress(self, p, button):
+        pass
+
+    def controllerButtonRelease(self, p, button):
+        pass
+
+class Game(Screen):
+    def __init__(self):
+        Screen.__init__(self)
+
         self.player1 = Player(48, 224, 1)
         self.player2 = Player(ledwall.SCR_W - 48 - 16, 224, 2)
 
@@ -747,7 +781,7 @@ class Game:
     def render(self):
         if self.blank:
             output.fill((0, 0, 0))
-            ledwall.drawText(self.message, 0, 11, (192, 255, 0), 1, center=True)
+            ledwall.drawText(self.message, 0, 11, COL_GREEN, 1, center=True)
             return
 
         for y in range(LEV_H):
@@ -769,13 +803,13 @@ class Game:
         for i in range(self.player2.ammo):
             output.blit(sprites['shot'], (ledwall.SCR_W - 11 - i * 8, 13))
 
-        #ledwall.drawText('PUMPKIN PIT', 0, 1, (192, 255, 0), 1, center=True)
+        #ledwall.drawText('PUMPKIN PIT', 0, 1, COL_GREEN, 1, center=True)
 
-        ledwall.drawText('%02i' % self.player1.score, x=0, y=1, color=(255, 255, 255))
-        ledwall.drawText('%02i' % self.player2.score, x=ledwall.SCR_W // 8 - 2, y=1, color=(255, 255, 255))
+        ledwall.drawText('%02i' % self.player1.score, x=0, y=1, color=COL_WHITE)
+        ledwall.drawText('%02i' % self.player2.score, x=ledwall.SCR_W // 8 - 2, y=1, color=COL_WHITE)
 
         if tick % 32 > 8:
-            ledwall.drawText(self.message, 0, 11, (192, 255, 0), 1, center=True)
+            ledwall.drawText(self.message, 0, 11, COL_GREEN, 1, center=True)
 
     def update(self):
         if not self.winner:
@@ -796,7 +830,7 @@ class Game:
 
         # -- handle events
         for e in events:
-            print(e)
+            #print(e)
             if e == 'MAGIC POTION COLLECTED':
                 createTimer('SPAWN MAGIC POTION', 120)
             elif e == 'AMMO COLLECTED':
@@ -831,9 +865,9 @@ class Game:
             elif e == 'PLAYER 2 STOP BLINKING':
                 self.player2.blink = False
 
-            elif e == 'PLAYER 1 WINS':
+            elif e == 'PLAYER 1 WINS ROUND':
                 self.setWinner(1)
-            elif e == 'PLAYER 2 WINS':
+            elif e == 'PLAYER 2 WINS ROUND':
                 self.setWinner(2)
 
             elif e == 'SHOW WINNER':
@@ -841,23 +875,14 @@ class Game:
                 createTimer('BLANK SCREEN', 180)
             elif e == 'BLANK SCREEN':
                 self.blank = True
-                createTimer('RESTART GAME', 60)
-            elif e == 'RESTART GAME':
+                if self.players[self.winner -1].score == WIN_SCORE_TOTAL:
+                    createTimer('END GAME', 120)
+                else:
+                    createTimer('NEXT ROUND', 60)
+            elif e == 'NEXT ROUND':
                 self.restart()
 
         events.clear()
-
-        # -- handle timers
-        remove = []
-        for t in timers:
-            t.update()
-
-            if t.isDue():
-                events.append(t.name)
-                remove.append(t)
-
-        for r in remove:
-            timers.remove(r)
 
     def keyPress(self, key):
         for i in range(2):
@@ -928,7 +953,6 @@ class Game:
         elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
             self.players[p].moveDown()
 
-
     def controllerButtonRelease(self, p, button):
         if button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
             self.players[p].stopLeft()
@@ -957,19 +981,125 @@ class Game:
         createTimer('SHOW WINNER', 60)
 
     def restart(self):
+        scoreBackup = self.player1.score, self.player2.score
         self.__init__()
+        self.player1.score, self.player2.score = scoreBackup
+
+
+class Title(Screen):
+    def __init__(self):
+        Screen.__init__(self)
+
+        self.blank = False
+
+    def render(self):
+        output.fill((0, 0, 0))
+
+        if self.blank:
+            return
+
+        ledwall.drawText('SPIELEENTWICKLUNG BODENSEE', 0, 6, COL_PURPLE, 1, center=True)
+        ledwall.drawText('-= PRESENTS =-', 0, 8, COL_PURPLE, 1, center=True)
+        ledwall.drawText('PUMPKIN PIT', 0, 7, COL_GREEN, 2, center=True, align=False)
+        ledwall.drawText('A', 0, 22, COL_PURPLE, 1, center=True)
+        ledwall.drawText('BODENSEE GAMEJAM 2026', 0, 24, COL_PURPLE, 1, center=True)
+        ledwall.drawText('ENTRY', 0, 26, COL_PURPLE, 1, center=True)
+
+        anim = (tick // 8) % 5 +1
+
+        output.blit(sprites['g%s_1 right' % anim], (16, 110))
+        output.blit(sprites['g%s_2 left' % anim], (ledwall.SCR_W - 32, 110))
+
+        if tick % 64 < 48:
+            ledwall.drawText('PRESS FIRE', 0, 32, COL_WHITE, 1, center=True)
+ 
+    def update(self):
+        pass
+
+    def keyPress(self, key):
+        if key in (PLAYER_KEYS[0][SHOOT], PLAYER_KEYS[1][SHOOT]):
+            createTimer('START GAME', 60)
+            self.blank = True
+
+    def keyRelease(self, key):
+        pass
+
+    def controllerAxisMotion(self, p, axis, value):
+        pass
+
+    def controllerButtonPress(self, p, button):
+        createTimer('START GAME', 60)
+        self.blank = True
+
+    def controllerButtonRelease(self, p, button):
+        pass
+
+
+class ResultScreen(Screen):
+    def __init__(self):
+        Screen.__init__(self)
+
+        self.blank = False
+        self.winner = 0
+
+        self.waitTimer = Timer(None, 60)
+
+    def render(self):
+        output.fill((0, 0, 0))
+
+        if self.blank:
+            return
+
+        ledwall.drawText('TOTAL WINNER:', 0, 6, COL_PURPLE, 1, center=True)
+
+        ledwall.drawText('PLAYER %s!' % self.winner, 0, 8, COL_GREEN, 1, center=True)
+
+        anim = (tick // 8) % 5 +1
+
+        output.blit(sprites['g%s_%s right' % (anim, self.winner)], (ledwall.SCR_W / 2 -8, 110))
+
+        if self.waitTimer.isDue():
+            if tick % 64 < 48:
+                ledwall.drawText('PRESS FIRE', 0, 32, COL_WHITE, 1, center=True)
+ 
+    def update(self):
+        self.waitTimer.update()
+
+    def keyPress(self, key):
+        if self.waitTimer.isDue():
+            if key in (PLAYER_KEYS[0][SHOOT], PLAYER_KEYS[1][SHOOT]):
+                createTimer('BACK TO TITLE', 60)
+                self.blank = True
+
+    def keyRelease(self, key):
+        pass
+
+    def controllerAxisMotion(self, p, axis, value):
+        pass
+
+    def controllerButtonPress(self, p, button):
+        if self.waitTimer.isDue():
+            createTimer('START GAME', 60)
+            self.blank = True
+
+    def controllerButtonRelease(self, p, button):
+        pass
 
 
 class Application:
     def __init__(self):
         self.running = True
 
-        self.game = Game()
+        self.titleScreen = Title()
+        self.gameScreen = Game()
+        self.resultScreen = ResultScreen()
+
+        self.currentScreen = self.titleScreen
 
     def render(self):
         output.fill((0, 0, 0))
 
-        self.game.render()
+        self.currentScreen.render()
 
         ledwall.compose()
 
@@ -999,26 +1129,54 @@ class Application:
                     pygame.display.toggle_fullscreen()
 
                 else:
-                    self.game.keyPress(e.key)
+                    self.currentScreen.keyPress(e.key)
+
             elif e.type == pygame.KEYUP:
-                self.game.keyRelease(e.key)
+                self.currentScreen.keyRelease(e.key)
 
             elif e.type == pygame.CONTROLLERAXISMOTION and joymode == 'controller':
                 value = max(-1, e.value / 32767)
                 p = e.instance_id
-                self.game.controllerAxisMotion(p, e.axis, value)
+                self.currentScreen.controllerAxisMotion(p, e.axis, value)
 
             elif e.type == pygame.CONTROLLERBUTTONDOWN and joymode == 'controller':
                 p = e.instance_id
-                self.game.controllerButtonPress(p, e.button)
+                self.currentScreen.controllerButtonPress(p, e.button)
 
             elif e.type == pygame.CONTROLLERBUTTONUP and joymode == 'controller':
                 p = e.instance_id
-                self.game.controllerButtonRelease(p, e.button)
+                self.currentScreen.controllerButtonRelease(p, e.button)
 
 
     def update(self):
-        self.game.update()
+        for e in events:
+            if e == 'START GAME':
+                self.currentScreen = self.gameScreen
+                self.gameScreen.__init__()
+                self.titleScreen.blank = False
+                events.remove(e)
+            elif e == 'END GAME':
+                self.currentScreen = self.resultScreen
+                self.resultScreen.__init__()
+                self.resultScreen.winner = 1 if self.gameScreen.player1.score > self.gameScreen.player2.score else 2
+                events.remove(e)
+            elif e == 'BACK TO TITLE':
+                self.currentScreen = self.titleScreen
+                events.remove(e)
+
+        self.currentScreen.update()
+
+        # -- handle timers
+        remove = []
+        for t in timers:
+            t.update()
+
+            if t.isDue():
+                events.append(t.name)
+                remove.append(t)
+
+        for r in remove:
+            timers.remove(r)
 
 
 app = Application()
