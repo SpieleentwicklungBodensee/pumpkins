@@ -222,6 +222,7 @@ def initLevel(number):
         level.append(line)
 
 levelnumber = -1
+roundnumber = 1
 
 LEV_W = len(level_1[0])
 LEV_H = len(level_1)
@@ -777,6 +778,11 @@ class Game(Screen):
         initLevel(levelnumber % len(levels))
 
         particles_reset_juice()
+        
+        global roundnumber
+        self.roundTimer = Timer(None, 128)
+        self.message = 'ROUND %s' % roundnumber
+
 
     def render(self):
         if self.blank:
@@ -885,6 +891,12 @@ class Game(Screen):
 
         events.clear()
 
+        if self.roundTimer is not None:
+            self.roundTimer.update()
+            if self.roundTimer.isDue():
+                self.message = ''
+                self.roundTimer = None
+
     def keyPress(self, key):
         for i in range(2):
             if key == PLAYER_KEYS[i][LEFT]:
@@ -982,6 +994,9 @@ class Game(Screen):
         createTimer('SHOW WINNER', 60)
 
     def restart(self):
+        global roundnumber
+        roundnumber += 1
+
         scoreBackup = self.player1.score, self.player2.score
         self.__init__()
         self.player1.score, self.player2.score = scoreBackup
@@ -1155,6 +1170,8 @@ class Application:
                 self.currentScreen = self.gameScreen
                 self.gameScreen.__init__()
                 self.titleScreen.blank = False
+                global roundnumber
+                roundnumber = 1
                 events.remove(e)
             elif e == 'END GAME':
                 self.currentScreen = self.resultScreen
