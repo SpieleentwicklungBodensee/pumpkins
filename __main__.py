@@ -733,7 +733,7 @@ class Player:
 
 class Screen:
     def __init__(self):
-        pass
+        self.startTick = tick
 
     def render(self):
         pass
@@ -808,7 +808,7 @@ class Game(Screen):
         ledwall.drawText('%02i' % self.player1.score, x=0, y=1, color=COL_WHITE)
         ledwall.drawText('%02i' % self.player2.score, x=ledwall.SCR_W // 8 - 2, y=1, color=COL_WHITE)
 
-        if tick % 32 > 8:
+        if (tick - self.startTick) % 32 > 8:
             ledwall.drawText(self.message, 0, 11, COL_GREEN, 1, center=True)
 
     def update(self):
@@ -872,11 +872,12 @@ class Game(Screen):
 
             elif e == 'SHOW WINNER':
                 self.message = 'PLAYER %i WINS!' % self.winner
+                self.startTick = tick
                 createTimer('BLANK SCREEN', 180)
             elif e == 'BLANK SCREEN':
                 self.blank = True
                 if self.players[self.winner -1].score == WIN_SCORE_TOTAL:
-                    createTimer('END GAME', 120)
+                    createTimer('END GAME', 60)
                 else:
                     createTimer('NEXT ROUND', 60)
             elif e == 'NEXT ROUND':
@@ -1010,7 +1011,7 @@ class Title(Screen):
         output.blit(sprites['g%s_1 right' % anim], (16, 110))
         output.blit(sprites['g%s_2 left' % anim], (ledwall.SCR_W - 32, 110))
 
-        if tick % 64 < 48:
+        if (tick - self.startTick) % 64 < 48:
             ledwall.drawText('PRESS FIRE', 0, 32, COL_WHITE, 1, center=True)
  
     def update(self):
@@ -1050,7 +1051,7 @@ class ResultScreen(Screen):
         if self.blank:
             return
 
-        ledwall.drawText('TOTAL WINNER:', 0, 6, COL_PURPLE, 1, center=True)
+        ledwall.drawText('TOTAL WINNER', 0, 6, COL_PURPLE, 1, center=True)
 
         ledwall.drawText('PLAYER %s!' % self.winner, 0, 8, COL_GREEN, 1, center=True)
 
@@ -1059,7 +1060,7 @@ class ResultScreen(Screen):
         output.blit(sprites['g%s_%s right' % (anim, self.winner)], (ledwall.SCR_W / 2 -8, 110))
 
         if self.waitTimer.isDue():
-            if tick % 64 < 48:
+            if (tick - self.startTick) % 64 < 48:
                 ledwall.drawText('PRESS FIRE', 0, 32, COL_WHITE, 1, center=True)
  
     def update(self):
